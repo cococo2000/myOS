@@ -2,5 +2,5 @@
 
 ## Introduction
 
-A repository for OSlab-MIPS 2020 in UCAS.
+A repository for OSLab-MIPS 2020 in UCAS.
 
