@@ -12,7 +12,7 @@ bootblock: $(SRC_BOOT)
 	${CC} -g -G 0 -fno-pic -mno-abicalls -fno-builtin -nostdinc -mips3 -Ttext=0xffffffffa0800000 -N -o bootblock $(SRC_BOOT) -nostdlib -e main -Wl,-m -Wl,elf64ltsmip -T $(SRC_LD)
 
 main: 
-	${CC} -g -G 0 -fno-pic -mno-abicalls -fno-builtin -nostdinc -mips3 -Ttext=0xffffffffa0800200 -N -o main $(SRC_KERNEL) -nostdlib -e main -Wl,-m -Wl,elf64ltsmip -T $(SRC_LD)	
+	${CC} -g -G 0 -fno-pic -mno-abicalls -fno-builtin -nostdinc -mips3 -Ttext=0xffffffffa0800000 -N -o main $(SRC_KERNEL) -nostdlib -e main -Wl,-m -Wl,elf64ltsmip -T $(SRC_LD)	
 
 createimage:
 	gcc $(SRC_IMAGE) -o createimage

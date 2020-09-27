@@ -75,7 +75,7 @@ static void create_image(int nfiles, char *files[])
     Elf64_Phdr phdr;
 
     /* open the image file */
-    img = fopen(IMAGE_FILE,"wb");   //创建空白的image文件用于后续写入
+    img = fopen(IMAGE_FILE,"wb");
     /* for each input file */
     while (nfiles-- > 0) {
 
@@ -116,27 +116,36 @@ static void read_phdr(Elf64_Phdr *phdr, FILE *fp, int ph,
 static void write_segment(Elf64_Ehdr ehdr, Elf64_Phdr phdr, FILE *fp,
                           FILE *img, int *nbytes, int *first)
 {
-    char buffer[512] = "";                          //存放要写入image的内容
-    printf("phdr:\noffset = 0x%lx\nfilesz = 0x%lx\nmemsz = 0x%lx\n",phdr.p_offset,phdr.p_filesz,phdr.p_memsz);
+    // create a buffer to hold the image
+    char * file = (char *)malloc(sizeof(char) * phdr.p_filesz);
+    // clear the buffer
+    memset(file, '\0', phdr.p_filesz);
+    // read the file
     fseek(fp, phdr.p_offset, SEEK_SET);
-    fread(buffer, phdr.p_filesz, 1, fp);
-    for(int i = phdr.p_filesz; i < 0x200; i++){
-        buffer[i] = 0;
-    }
-    printf("%s\n",buffer);
-    fseek(img, 0x200 * (*first), SEEK_SET);
-    fwrite(buffer, 0x200, 1, img);
-    *nbytes += 512;
-    (*first)++;
+    fread(file, phdr.p_filesz, 1, fp);
+    // write the file to the image
+    fseek(img, SECTOR_SIZE * (*first), SEEK_SET);
+    fwrite(file, phdr.p_filesz, 1, img);
+    // all zero string bytes
+    char zero[SECTOR_SIZE];
+    memset(zero, '\0', SECTOR_SIZE);
+    // put zero string to the end
+    fseek(img, SECTOR_SIZE * (*first) + phdr.p_filesz, SEEK_SET);
+    fwrite(zero, SECTOR_SIZE - (phdr.p_filesz % SECTOR_SIZE), 1, img);
+    // ceil(phdr.p_memsz)
+    *nbytes += phdr.p_memsz + SECTOR_SIZE - (phdr.p_memsz % SECTOR_SIZE);
+    (*first) += (phdr.p_memsz - 1) / SECTOR_SIZE + 1;
+    // free the buffer
+    free(file);
 }
 
 static void write_os_size(int nbytes, FILE *img)
 {
-    fseek(img, BOOT_LOADER_SIG_OFFSET - OS_SIZE_LOC, SEEK_SET);
-    char others[4] = {0x01, 0x00, BOOT_LOADER_SIG_1, BOOT_LOADER_SIG_2}; //将kernel的扇区数写到image中
-    int kernel_size = (nbytes + 511)/ 512;    //kernel占据的扇区数
+    char others[4] = {0x01, 0x00, BOOT_LOADER_SIG_1, BOOT_LOADER_SIG_2};
+    int kernel_size = (nbytes - 1) / SECTOR_SIZE;
     others[0] = (char)kernel_size;
-    others[1] = (char)(kernel_size / 256);
+    others[1] = (char)(kernel_size >> 8);
+    fseek(img, BOOT_LOADER_SIG_OFFSET - OS_SIZE_LOC, SEEK_SET);
     fwrite(others, 4, 1, img);
 }
 
