@@ -11,7 +11,9 @@ main:
 	ld $a0, kernel
 	li $a1, 0x200
 	# li $a2, 0x200
-	lw $a2, kernel_size
+	dla $a2, kernel_size
+	ld $a2,0($a2)
+	lh $a2,0($a2)
 	dsll $a2, $a2, 9
 	ld $t0, read_sd_card
 	ld $ra, kernel_main
