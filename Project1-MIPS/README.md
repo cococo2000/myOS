@@ -4,9 +4,9 @@
 
 ##### /arch/mips/boot/bootblock.S 实现bootloader引导kernel的功能（重定位+大核加载）
 
-##### /test目录下的kernel.c实现一个小的操作系统内核，具有打印字符串和回显输入字符的功能
+##### /test/kernel.c实现一个小的操作系统内核，具有打印字符串和回显输入字符的功能
 
-##### /tools目录下的createimage.c实现将bootblock和kernel合并为一个完整SD卡镜像文件。
+##### /tools/createimage.c实现将bootblock和kernel合并为一个完整SD卡镜像文件。
 
 ## 代码合集(/code)
 
