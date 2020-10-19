@@ -3,4 +3,5 @@ createimage
 image
 disk
 main
+kernel.txt
 *.o
