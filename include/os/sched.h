@@ -71,14 +71,12 @@ typedef struct pcb
     /* register context */
     regs_context_t kernel_context;
     regs_context_t user_context;
-
+    /* stack top */
     uint64_t kernel_stack_top;
     uint64_t user_stack_top;
-
     /* previous, next pointer */
     struct pcb * prev;
     struct pcb * next;
-
     /* priority */
     int priority;
     // name
@@ -95,6 +93,7 @@ typedef struct pcb
     /* sleep time */
     int begin_sleep_time;
     int sleep_time;
+} pcb_t;
     /* task in which queue */
     
     /* What tasks are blocked by me, the tasks in this 
@@ -103,7 +102,6 @@ typedef struct pcb
     /* holding lock */
 
     /* block related */
-} pcb_t;
 
 /* task information, used to init PCB */
 typedef struct task_info
