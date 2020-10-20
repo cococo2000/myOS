@@ -76,6 +76,9 @@ void scheduler(void)
         current_running = (pcb_t *)queue_dequeue(&ready_queue);
     }
     current_running->status = TASK_RUNNING;
+    current_running->count += 1;
+    vt100_move_cursor(1, current_running->pid + 4);
+    printk("%s\t times: %d\n", current_running->name, current_running->count);
 }
 
 void do_sleep(uint32_t sleep_time)

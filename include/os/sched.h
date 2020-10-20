@@ -49,7 +49,7 @@ typedef struct regs_context
     uint64_t pc;
 } regs_context_t; /* 256 + 56 = 312B */
 
-typedef enum
+typedef enum task_status
 {
     TASK_BLOCKED,
     TASK_RUNNING,
@@ -57,7 +57,7 @@ typedef enum
     TASK_EXITED,
 } task_status_t;
 
-typedef enum
+typedef enum task_type
 {
     KERNEL_PROCESS,
     KERNEL_THREAD,
@@ -93,6 +93,8 @@ typedef struct pcb
     /* sleep time */
     int begin_sleep_time;
     int sleep_time;
+
+    int count;
 } pcb_t;
     /* task in which queue */
     

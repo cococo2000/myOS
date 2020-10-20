@@ -2,8 +2,8 @@
 
 /* task group to test do_scheduler() */
 struct task_info task2_1 = {"task1", (uint64_t)&printk_task1, USER_PROCESS};
-struct task_info task2_2 = {"task1", (uint64_t)&printk_task2, USER_PROCESS};
-struct task_info task2_3 = {"task1", (uint64_t)&drawing_task1, USER_PROCESS};
+struct task_info task2_2 = {"task2", (uint64_t)&printk_task2, USER_PROCESS};
+struct task_info task2_3 = {"task3", (uint64_t)&drawing_task1, USER_PROCESS};
 struct task_info *sched1_tasks[16] = {&task2_1, &task2_2, &task2_3};
 int num_sched1_tasks = 3;
 

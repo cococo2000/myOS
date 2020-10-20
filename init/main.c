@@ -53,79 +53,69 @@ static void init_pcb()
     queue_init(&ready_queue);
     queue_init(&block_queue);
     // queue_init(&sleep_queue);
-        
-    pcb[0].pid = process_id++;
-    pcb[0].status = TASK_RUNNING;
-    int cur_queue_id = 1;
-
+    int num_total_tasks_groups = 2;
+    int each_tasks_num[4] = {num_sched1_tasks, num_lock_tasks};
+    struct task_info ** p_task_info[4] = {sched1_tasks, lock_tasks};
+    int cur_queue_id = 0;
+    // pcb[0] init
+    bzero(&pcb[cur_queue_id], sizeof(pcb_t));
+    pcb[cur_queue_id].kernel_stack_top = stack_top;
+    pcb[cur_queue_id].kernel_context.regs[29] = stack_top;
+    stack_top -= PCB_STACK_SIZE;
+    pcb[cur_queue_id].kernel_context.cp0_status = initial_cp0_status;
+    pcb[cur_queue_id].user_stack_top = stack_top;
+    pcb[cur_queue_id].user_context.regs[29] = stack_top;
+    stack_top -= PCB_STACK_SIZE;
+    pcb[cur_queue_id].user_context.cp0_status = initial_cp0_status;
+    pcb[cur_queue_id].priority = 1;
+    strcpy(pcb[cur_queue_id].name, "task0");
+    pcb[cur_queue_id].pid = process_id++;
+    pcb[cur_queue_id].status = TASK_RUNNING;
+    pcb[cur_queue_id].cursor_x = 0;
+    pcb[cur_queue_id].cursor_y = 0;
+    pcb[cur_queue_id].begin_sleep_time = 0;
+    pcb[cur_queue_id].sleep_time = 0;
+    pcb[cur_queue_id].count = 0;
+    cur_queue_id++;
     //scheduler1 task1
-    int i;
-    for(i = 0; i < num_sched1_tasks; i++, cur_queue_id++)
-    {
-        bzero(&pcb[cur_queue_id].kernel_context, sizeof(pcb[cur_queue_id].kernel_context));
-        pcb[cur_queue_id].kernel_stack_top = stack_top;
-        pcb[cur_queue_id].kernel_context.regs[29] = stack_top;
-        stack_top -= PCB_STACK_SIZE;
-        pcb[cur_queue_id].kernel_context.regs[31] = sched1_tasks[i]->entry_point;
-        pcb[cur_queue_id].kernel_context.cp0_status = initial_cp0_status;
-        pcb[cur_queue_id].kernel_context.cp0_epc = sched1_tasks[i]->entry_point;
-        
-        bzero(&pcb[cur_queue_id].user_context, sizeof(pcb[cur_queue_id].user_context));
-        pcb[cur_queue_id].user_stack_top = stack_top;
-        pcb[cur_queue_id].user_context.regs[29] = stack_top;
-        stack_top -= PCB_STACK_SIZE;
-        pcb[cur_queue_id].user_context.regs[31] = sched1_tasks[i]->entry_point;
-        pcb[cur_queue_id].user_context.cp0_status = initial_cp0_status;
-        pcb[cur_queue_id].user_context.cp0_epc = sched1_tasks[i]->entry_point;
-
-        pcb[cur_queue_id].prev = NULL;
-        pcb[cur_queue_id].next = NULL;
-        pcb[cur_queue_id].priority = 1;
-        strcpy(pcb[cur_queue_id].name, sched1_tasks[i]->name);
-        pcb[cur_queue_id].pid = process_id++;
-        pcb[cur_queue_id].type = sched1_tasks[i]->type;
-        pcb[cur_queue_id].status = TASK_READY;
-        pcb[cur_queue_id].cursor_x = 0;
-        pcb[cur_queue_id].cursor_y = 0;
-        pcb[cur_queue_id].begin_sleep_time = 0;
-        pcb[cur_queue_id].sleep_time = 0;
-
-        queue_push(&ready_queue, (void *)&pcb[cur_queue_id]);
+    int i, j;
+    for(j = 0; j < num_total_tasks_groups; j++){
+        for(i = 0; i < each_tasks_num[j]; i++, cur_queue_id++)
+        {
+            // init pcb all 0
+            bzero(&pcb[cur_queue_id], sizeof(pcb_t));
+            // init kernel_context and stack
+            pcb[cur_queue_id].kernel_stack_top = stack_top;
+            pcb[cur_queue_id].kernel_context.regs[29] = stack_top;
+            stack_top -= PCB_STACK_SIZE;
+            pcb[cur_queue_id].kernel_context.regs[31] = p_task_info[j][i]->entry_point;
+            pcb[cur_queue_id].kernel_context.cp0_status = initial_cp0_status;
+            pcb[cur_queue_id].kernel_context.cp0_epc = p_task_info[j][i]->entry_point;
+            // init user_context and stack
+            pcb[cur_queue_id].user_stack_top = stack_top;
+            pcb[cur_queue_id].user_context.regs[29] = stack_top;
+            stack_top -= PCB_STACK_SIZE;
+            pcb[cur_queue_id].user_context.regs[31] = p_task_info[j][i]->entry_point;
+            pcb[cur_queue_id].user_context.cp0_status = initial_cp0_status;
+            pcb[cur_queue_id].user_context.cp0_epc = p_task_info[j][i]->entry_point;
+            // init other data
+            pcb[cur_queue_id].prev = NULL;
+            pcb[cur_queue_id].next = NULL;
+            pcb[cur_queue_id].priority = 1;
+            strcpy(pcb[cur_queue_id].name, p_task_info[j][i]->name);
+            pcb[cur_queue_id].pid = process_id++;
+            pcb[cur_queue_id].type = p_task_info[j][i]->type;
+            pcb[cur_queue_id].status = TASK_READY;
+            pcb[cur_queue_id].cursor_x = 0;
+            pcb[cur_queue_id].cursor_y = 0;
+            pcb[cur_queue_id].begin_sleep_time = 0;
+            pcb[cur_queue_id].sleep_time = 0;
+            pcb[cur_queue_id].count = 0;
+            // add to ready_queue
+            queue_push(&ready_queue, (void *)&pcb[cur_queue_id]);
+        }
     }
-
-    // lock 1
-    for(i = 0; i < num_lock_tasks; i++, cur_queue_id++){
-        bzero(&pcb[cur_queue_id].kernel_context, sizeof(pcb[cur_queue_id].kernel_context));
-        pcb[cur_queue_id].kernel_stack_top = stack_top;
-        pcb[cur_queue_id].kernel_context.regs[29] = stack_top;
-        stack_top -= PCB_STACK_SIZE;
-        pcb[cur_queue_id].kernel_context.regs[31] = lock_tasks[i]->entry_point;
-        pcb[cur_queue_id].kernel_context.cp0_status = initial_cp0_status;
-        pcb[cur_queue_id].kernel_context.cp0_epc = lock_tasks[i]->entry_point;
-        
-        bzero(&pcb[cur_queue_id].user_context, sizeof(pcb[cur_queue_id].user_context));
-        pcb[cur_queue_id].user_stack_top = stack_top;
-        pcb[cur_queue_id].user_context.regs[29] = stack_top;
-        stack_top -= PCB_STACK_SIZE;
-        pcb[cur_queue_id].user_context.regs[31] = lock_tasks[i]->entry_point;
-        pcb[cur_queue_id].user_context.cp0_status = initial_cp0_status;
-        pcb[cur_queue_id].user_context.cp0_epc = lock_tasks[i]->entry_point;
-
-        pcb[cur_queue_id].prev = NULL;
-        pcb[cur_queue_id].next = NULL;
-        pcb[cur_queue_id].priority = 1;
-        strcpy(pcb[cur_queue_id].name, lock_tasks[i]->name);
-        pcb[cur_queue_id].pid = process_id++;
-        pcb[cur_queue_id].type = lock_tasks[i]->type;
-        pcb[cur_queue_id].status = TASK_READY;
-        pcb[cur_queue_id].cursor_x = 0;
-        pcb[cur_queue_id].cursor_y = 0;
-        pcb[cur_queue_id].begin_sleep_time = 0;
-        pcb[cur_queue_id].sleep_time = 0;
-
-        queue_push(&ready_queue, (void *)&pcb[cur_queue_id]);
-    }
-
+    // init current_running pointer to pcb[0]
     current_running = &pcb[0];
 }
 
