@@ -13,7 +13,7 @@ void sleep_task(void)
 
     while (1)
     {
-        for (i = 0; i < 20000; i++)
+        for (i = 0; i < 20; i++)
         {
             sys_move_cursor(1, print_location);
             printf("> [TASK] This task is to test sleep(). (%d)\n", i);
@@ -28,5 +28,6 @@ void sleep_task(void)
         sleep_time = sleep_time + 1;
         sys_move_cursor(1, print_location);
         printf("%s", blank);
+        do_scheduler();
     }
 }

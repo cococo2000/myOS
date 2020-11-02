@@ -45,6 +45,10 @@ extern struct task_info *sched1_tasks[16];
 extern int num_sched1_tasks;
 extern struct task_info *lock_tasks[16];
 extern int num_lock_tasks;
+extern struct task_info *timer_tasks[16];
+extern int num_timer_tasks;
+extern struct task_info *sched2_tasks[16];
+extern int num_sched2_tasks;
 static void init_memory()
 {
 }
@@ -54,8 +58,8 @@ static void init_pcb()
     queue_init(&block_queue);
     // queue_init(&sleep_queue);
     int num_total_tasks_groups = 2;
-    int each_tasks_num[4] = {num_sched1_tasks, num_lock_tasks};
-    struct task_info ** p_task_info[4] = {sched1_tasks, lock_tasks};
+    int each_tasks_num[4] = {num_sched1_tasks, num_timer_tasks};
+    struct task_info ** p_task_info[4] = {sched1_tasks, timer_tasks};
     int cur_queue_id = 0;
     // pcb[0] init
     bzero(&pcb[cur_queue_id], sizeof(pcb_t));
@@ -73,8 +77,7 @@ static void init_pcb()
     pcb[cur_queue_id].status = TASK_RUNNING;
     pcb[cur_queue_id].cursor_x = 0;
     pcb[cur_queue_id].cursor_y = 0;
-    pcb[cur_queue_id].begin_sleep_time = 0;
-    pcb[cur_queue_id].sleep_time = 0;
+    pcb[cur_queue_id].sleep_end_time = 0;
     pcb[cur_queue_id].count = 0;
     cur_queue_id++;
     //scheduler1 task1
@@ -108,8 +111,7 @@ static void init_pcb()
             pcb[cur_queue_id].status = TASK_READY;
             pcb[cur_queue_id].cursor_x = 0;
             pcb[cur_queue_id].cursor_y = 0;
-            pcb[cur_queue_id].begin_sleep_time = 0;
-            pcb[cur_queue_id].sleep_time = 0;
+            pcb[cur_queue_id].sleep_end_time = 0;
             pcb[cur_queue_id].count = 0;
             // add to ready_queue
             queue_push(&ready_queue, (void *)&pcb[cur_queue_id]);
@@ -121,18 +123,26 @@ static void init_pcb()
 
 static void init_exception_handler()
 {
+    int i;
+    for(i = 1; i < 32; i++){
+        exception_handler[i]=(uint64_t)handle_other;
+    }
+    exception_handler[INT]=(uint64_t)handle_int;
+    exception_handler[SYS]=(uint64_t)handle_syscall;
 }
 
 static void init_exception()
 {
-
     /* fill nop */
-
+    init_exception_handler();
     /* fill nop */
-
+    memcpy(0xffffffff80000180, exception_handler_entry, (char *)exception_handler_end - (char *)exception_handler_begin);
     /* set COUNT & set COMPARE */
-
+    set_cp0_cause(0x00000000);
+    set_cp0_status(0x10000001);
     /* open interrupt */
+    // set_cp0_count(0x00000000);
+    // set_cp0_compare(0x000249f0);
 }
 
 // [2]
@@ -140,15 +150,18 @@ static void init_exception()
 
 static void init_syscall(void)
 {
+    syscall[SYSCALL_SLEEP] = (uint64_t (*)())do_sleep;
+    syscall[SYSCALL_WRITE] = (uint64_t (*)())screen_write;
+    syscall[SYSCALL_CURSOR] = (uint64_t (*)())screen_move_cursor;
+    syscall[SYSCALL_REFLUSH] = (uint64_t (*)())screen_reflush;
+    syscall[SYSCALL_MUTEX_LOCK_INIT] = (uint64_t (*)())do_mutex_lock_init;
+    syscall[SYSCALL_MUTEX_LOCK_ACQUIRE] = (uint64_t (*)())do_mutex_lock_acquire;
+    syscall[SYSCALL_MUTEX_LOCK_RELEASE] = (uint64_t (*)())do_mutex_lock_release;
 }
 
 /* [0] The beginning of everything >_< */
 void __attribute__((section(".entry_function"))) _start(void)
 {
-    // print "Hello OS!"
-    // void (*printstr)(char *) = (void *)0xffffffff8f0d5534;
-    // (*printstr)("\rHello OS!\n");
-    printk("enter OS\n");
 
     asm_start();
 

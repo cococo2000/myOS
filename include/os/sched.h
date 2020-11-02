@@ -40,10 +40,10 @@ typedef struct regs_context
     // Save main processor registers: 32 * 64 = 256B
     uint64_t regs[32];
     // Save special registers: 7 * 64 = 56B
-    uint32_t cp0_status;
-    uint32_t cp0_cause;
-    uint32_t hi;
-    uint32_t lo;
+    uint64_t cp0_status;
+    uint64_t cp0_cause;
+    uint64_t hi;
+    uint64_t lo;
     uint64_t cp0_badvaddr;
     uint64_t cp0_epc;
     uint64_t pc;
@@ -83,19 +83,6 @@ typedef struct pcb
     char name[32];
     /* process id */
     pid_t pid;
-    /* kernel/user thread/process */
-    task_type_t type;
-    /* BLOCK | READY | RUNNING */
-    task_status_t status;
-    /* cursor position */
-    int cursor_x;
-    int cursor_y;
-    /* sleep time */
-    int begin_sleep_time;
-    int sleep_time;
-
-    int count;
-} pcb_t;
     /* task in which queue */
     
     /* What tasks are blocked by me, the tasks in this 
@@ -104,6 +91,19 @@ typedef struct pcb
     /* holding lock */
 
     /* block related */
+
+    /* kernel/user thread/process */
+    task_type_t type;
+    /* BLOCK | READY | RUNNING */
+    task_status_t status;
+    /* cursor position */
+    int cursor_x;
+    int cursor_y;
+    /* sleep time */
+    int sleep_end_time;
+
+    int count;
+} pcb_t;
 
 /* task information, used to init PCB */
 typedef struct task_info
@@ -118,9 +118,6 @@ extern queue_t ready_queue;
 
 /* block queue to wait */
 extern queue_t block_queue;
-
-/* block queue in sleep */
-extern queue_t sleep_queue;
 
 /* current running task PCB */
 extern pcb_t *current_running;

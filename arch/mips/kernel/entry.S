@@ -74,8 +74,8 @@ END(asm_start)
 
 .macro RESTORE_CONTEXT offset
     .set    noat
-    daddi    k0, k0, \offset
     ld      k0, current_running
+    daddi    k0, k0, \offset
     ld      zero, OFFSET_REG0(k0)
     ld      AT, OFFSET_REG1(k0)
     ld      v0, OFFSET_REG2(k0)
@@ -135,27 +135,33 @@ LEAF(reset_timer)
 END(reset_timer)
 
 LEAF(set_cp0_status)
-    
+    mtc0 a0, CP0_STATUS
+    jr ra
 END(set_cp0_status)
 
 LEAF(set_cp0_cause)
-   
+    mtc0 a0, CP0_CAUSE
+    jr ra
 END(set_cp0_cause)
 
 LEAF(get_cp0_status)
-    
+    mfc0 v0, CP0_STATUS
+    jr ra
 END(get_cp0_status)
 
 LEAF(get_cp0_cause)
-    
+    mfc0 v0, CP0_CAUSE
+    jr ra
 END(get_cp0_cause)
 
 LEAF(get_cp0_count)
-     
+    mfc0 v0, CP0_COUNT
+    jr ra
 END(get_cp0_count)
 
 LEAF(get_cp0_compare)
-     
+    mfc0 v0, CP0_COMPARE
+    jr ra
 END(get_cp0_compare)
 
  
@@ -166,25 +172,43 @@ END(get_cp0_compare)
 
 NESTED(TLBexception_handler_entry, 0, sp)
 TLBexception_handler_begin:
-     
- 
+    
+
 TLBexception_handler_end:
 END(TLBexception_handler_entry)
 
 NESTED(exception_handler_entry, 0, sp)   
 exception_handler_begin:
-    
+    mfc0 k0, CP0_CAUSE
+    andi k0, k0, CAUSE_EXCCODE
+    dla k1, exception_handler
+    add k0 ,k0, k0
+    add k0, k0, k1
+    ld  k1, 0(k0)
+    jr  k1
 exception_handler_end:
 END(exception_handler_entry)
 
 NESTED(handle_int, 0, sp)
-    
-    
+    mfc0    a0, CP0_STATUS
+    mfc0    a1, CP0_CAUSE
+    jal     interrupt_helper
+    nop
+    j       exception_handler_exit
 END(handle_int)
 
 NESTED(handle_syscall, 0, sp)
-   
-    
+    mfc0 k0, CP0_EPC
+    addi k0, k0, 0x4
+    mtc0 k0, CP0_EPC
+    SAVE_CONTEXT(USER)
+    move a3, a2
+    move a2, a1
+    move a1, a0
+    move a0, v0
+    jal system_call_helper
+    nop
+    j   exception_handler_exit
 END(handle_syscall)
 
 NESTED(handle_tlb, 0, sp)
@@ -192,12 +216,12 @@ NESTED(handle_tlb, 0, sp)
 END(handle_tlb)
 
 NESTED(handle_other, 0, sp)
-    
-   
+    j   exception_handler_exit
 END(handle_other)
 
 LEAF(exception_handler_exit)
-  
+    RESTORE_CONTEXT(USER)
+    eret
 END(exception_handler_exit)
 
 LEAF(set_cp0_entryhi)
