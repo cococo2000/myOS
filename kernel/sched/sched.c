@@ -50,7 +50,7 @@ static void free_user_stack(uint64_t stack_addr)
 /* Process Control Block */
 void set_pcb(pid_t pid, pcb_t *pcb, task_info_t *task_info)
 {
-     
+    
 }
 
 /* ready queue to run */
@@ -61,18 +61,20 @@ queue_t block_queue ;
 
 static void check_sleeping()
 {
-    uint32_t current_time = get_timer();
     if(queue_is_empty(&block_queue)){
         return;
     }
     pcb_t* temp = block_queue.head;
     while(temp != NULL){
+        uint32_t current_time = get_timer();
         if((temp->sleep_end_time < current_time) || (temp->sleep_begin_time > current_time)){
-            queue_remove(&block_queue, temp);
+            pcb_t * p = queue_remove(&block_queue, temp);
             temp->status = TASK_READY;
             queue_push(&ready_queue, temp);
+            temp = p;
+        }else{
+            temp = temp->next;
         }
-        temp = temp->next;
     }
 }
 
@@ -94,10 +96,10 @@ void scheduler(void)
     current_running->status = TASK_RUNNING;
 
     current_running->count += 1;
-    vt100_move_cursor(1, 11);
-    printk("current_running -> %s", current_running->name);
-    vt100_move_cursor(1, current_running->pid + 10);
-    printk("%s\t times: %d", current_running->name, current_running->count);
+    // vt100_move_cursor(1, 12);
+    // printk("current_running -> %s", current_running->name);
+    // vt100_move_cursor(1, current_running->pid + 12);
+    // printk("> %s\t times: %d", current_running->name, current_running->count);
     screen_cursor_x = current_running->cursor_x;
     screen_cursor_y = current_running->cursor_y;
 }

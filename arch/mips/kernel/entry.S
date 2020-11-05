@@ -174,7 +174,11 @@ LEAF(get_cp0_compare)
     jr ra
 END(get_cp0_compare)
 
- 
+LEAF(get_cp0_epc)
+    mfc0 v0, CP0_EPC
+    jr ra
+END(get_cp0_epc)
+
 .global exception_handler_begin
 .global exception_handler_end
 .global TLBexception_handler_begin

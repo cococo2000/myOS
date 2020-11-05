@@ -72,6 +72,7 @@ extern void set_cp0_cause(uint32_t);
 extern uint32_t get_cp0_compare(void);
 extern uint32_t get_cp0_cause(void);
 extern uint32_t get_cp0_status(void);
+extern uint32_t get_cp0_epc(void);
 
 /* exception handler entery */
 extern void exception_handler_entry(void);

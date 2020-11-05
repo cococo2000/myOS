@@ -28,6 +28,8 @@ static void irq_timer()
 void other_exception_handler()
 {
     time_elapsed += 1000000;
+    vt100_move_cursor(1, 25);
+    printk("Other exception occur: %u", get_cp0_epc());
 }
 
 void interrupt_helper(uint32_t status, uint32_t cause)
