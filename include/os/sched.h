@@ -100,6 +100,7 @@ typedef struct pcb
     int cursor_x;
     int cursor_y;
     /* sleep time */
+    int sleep_begin_time;
     int sleep_end_time;
 
     int count;

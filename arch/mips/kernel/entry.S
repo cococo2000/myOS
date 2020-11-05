@@ -134,6 +134,16 @@ LEAF(reset_timer)
     
 END(reset_timer)
 
+LEAF(set_cp0_count)
+    mtc0 a0, CP0_COUNT
+    jr ra
+END(set_cp0_count)
+
+LEAF(set_cp0_compare)
+    mtc0 a0, CP0_COMPARE
+    jr ra
+END(set_cp0_compare)
+
 LEAF(set_cp0_status)
     mtc0 a0, CP0_STATUS
     jr ra
@@ -169,6 +179,7 @@ END(get_cp0_compare)
 .global exception_handler_end
 .global TLBexception_handler_begin
 .global TLBexception_handler_end
+.global exception_handler_exit
 
 NESTED(TLBexception_handler_entry, 0, sp)
 TLBexception_handler_begin:
@@ -179,6 +190,7 @@ END(TLBexception_handler_entry)
 
 NESTED(exception_handler_entry, 0, sp)   
 exception_handler_begin:
+    // jump exception_handler[i] which decided by CP0_CAUSE: EXCCODE
     mfc0 k0, CP0_CAUSE
     andi k0, k0, CAUSE_EXCCODE
     dla k1, exception_handler
@@ -190,6 +202,7 @@ exception_handler_end:
 END(exception_handler_entry)
 
 NESTED(handle_int, 0, sp)
+    SAVE_CONTEXT(USER)
     mfc0    a0, CP0_STATUS
     mfc0    a1, CP0_CAUSE
     jal     interrupt_helper

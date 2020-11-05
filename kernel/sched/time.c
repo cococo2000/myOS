@@ -11,9 +11,7 @@ uint32_t get_ticks()
 
 uint32_t get_timer()
 {
-    time_elapsed ++;
-    return time_elapsed;
-    // return time_elapsed / (10000000);
+    return time_elapsed / (10000000);
 }
 
 void latency(uint32_t time)

@@ -57,9 +57,9 @@ static void init_pcb()
     queue_init(&ready_queue);
     queue_init(&block_queue);
     // queue_init(&sleep_queue);
-    int num_total_tasks_groups = 2;
-    int each_tasks_num[4] = {num_sched1_tasks, num_timer_tasks};
-    struct task_info ** p_task_info[4] = {sched1_tasks, timer_tasks};
+    int num_total_tasks_groups = 3;
+    int each_tasks_num[4] = {num_lock_tasks, num_timer_tasks, num_sched2_tasks};
+    struct task_info ** p_task_info[4] = {lock_tasks, timer_tasks, sched2_tasks};
     int cur_queue_id = 0;
     // pcb[0] init
     bzero(&pcb[cur_queue_id], sizeof(pcb_t));
@@ -72,11 +72,12 @@ static void init_pcb()
     stack_top -= PCB_STACK_SIZE;
     pcb[cur_queue_id].user_context.cp0_status = initial_cp0_status;
     pcb[cur_queue_id].priority = 1;
-    strcpy(pcb[cur_queue_id].name, "task0");
+    strcpy(pcb[cur_queue_id].name, "task0 ");
     pcb[cur_queue_id].pid = process_id++;
     pcb[cur_queue_id].status = TASK_RUNNING;
     pcb[cur_queue_id].cursor_x = 0;
     pcb[cur_queue_id].cursor_y = 0;
+    pcb[cur_queue_id].sleep_begin_time = 0;
     pcb[cur_queue_id].sleep_end_time = 0;
     pcb[cur_queue_id].count = 0;
     cur_queue_id++;
@@ -91,7 +92,7 @@ static void init_pcb()
             pcb[cur_queue_id].kernel_stack_top = stack_top;
             pcb[cur_queue_id].kernel_context.regs[29] = stack_top;
             stack_top -= PCB_STACK_SIZE;
-            pcb[cur_queue_id].kernel_context.regs[31] = p_task_info[j][i]->entry_point;
+            pcb[cur_queue_id].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
             pcb[cur_queue_id].kernel_context.cp0_status = initial_cp0_status;
             pcb[cur_queue_id].kernel_context.cp0_epc = p_task_info[j][i]->entry_point;
             // init user_context and stack
@@ -111,6 +112,7 @@ static void init_pcb()
             pcb[cur_queue_id].status = TASK_READY;
             pcb[cur_queue_id].cursor_x = 0;
             pcb[cur_queue_id].cursor_y = 0;
+            pcb[cur_queue_id].sleep_begin_time = 0;
             pcb[cur_queue_id].sleep_end_time = 0;
             pcb[cur_queue_id].count = 0;
             // add to ready_queue
@@ -137,12 +139,11 @@ static void init_exception()
     init_exception_handler();
     /* fill nop */
     memcpy(0xffffffff80000180, exception_handler_entry, (char *)exception_handler_end - (char *)exception_handler_begin);
-    /* set COUNT & set COMPARE */
     set_cp0_cause(0x00000000);
-    set_cp0_status(0x10000001);
+    /* set COUNT & set COMPARE */
     /* open interrupt */
-    // set_cp0_count(0x00000000);
-    // set_cp0_compare(0x000249f0);
+    set_cp0_count(0x00000000);
+    set_cp0_compare(TIMER_INTERVAL);
 }
 
 // [2]
@@ -199,6 +200,7 @@ void __attribute__((section(".entry_function"))) _start(void)
     /* set cp0_status register to allow interrupt */
     // enable exception and interrupt
     // ERL = 0, EXL = 0, IE = 1
+    set_cp0_status(initial_cp0_status);
 
     while (1)
     {

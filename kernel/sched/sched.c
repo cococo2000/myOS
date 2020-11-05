@@ -67,23 +67,21 @@ static void check_sleeping()
     }
     pcb_t* temp = block_queue.head;
     while(temp != NULL){
-        if(temp->sleep_end_time < current_time){
-            queue_remove(&block_queue, temp);            
+        if((temp->sleep_end_time < current_time) || (temp->sleep_begin_time > current_time)){
+            queue_remove(&block_queue, temp);
             temp->status = TASK_READY;
             queue_push(&ready_queue, temp);
         }
         temp = temp->next;
     }
-    return;
 }
 
 void scheduler(void)
 {
-    check_sleeping();
-
     current_running->cursor_x = screen_cursor_x;
     current_running->cursor_y = screen_cursor_y;
 
+    check_sleeping();
     if(current_running->status != TASK_BLOCKED){
         current_running->status = TASK_READY;
         if(current_running->pid != 1){
@@ -96,9 +94,10 @@ void scheduler(void)
     current_running->status = TASK_RUNNING;
 
     current_running->count += 1;
-    vt100_move_cursor(1, current_running->pid + 30);
-    printk("%s\t times: %d\n", current_running->name, current_running->count);
-
+    vt100_move_cursor(1, 11);
+    printk("current_running -> %s", current_running->name);
+    vt100_move_cursor(1, current_running->pid + 10);
+    printk("%s\t times: %d", current_running->name, current_running->count);
     screen_cursor_x = current_running->cursor_x;
     screen_cursor_y = current_running->cursor_y;
 }
@@ -106,9 +105,10 @@ void scheduler(void)
 void do_sleep(uint32_t sleep_time)
 {
     current_running->status = TASK_BLOCKED;
-    current_running->sleep_end_time = get_timer() + sleep_time;
+    current_running->sleep_begin_time = get_timer();
+    current_running->sleep_end_time = current_running->sleep_begin_time + sleep_time;
     queue_push(&block_queue, current_running);
-    do_scheduler(); 
+    do_scheduler();
 }
 
 void do_exit(void)

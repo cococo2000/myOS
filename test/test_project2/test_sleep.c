@@ -28,6 +28,5 @@ void sleep_task(void)
         sleep_time = sleep_time + 1;
         sys_move_cursor(1, print_location);
         printf("%s", blank);
-        do_scheduler();
     }
 }

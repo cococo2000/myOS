@@ -40,6 +40,7 @@ void do_mutex_lock_release(mutex_lock_t *lock)
 {
     if(!queue_is_empty(&lock->queue)){
         do_unblock_one(&lock->queue);
+        do_scheduler();
     }else{
         lock->status = UNLOCKED;
     }

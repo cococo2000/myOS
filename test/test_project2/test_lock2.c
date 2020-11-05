@@ -36,7 +36,7 @@ void lock_task1(void)
                 sys_move_cursor(1, print_location);
                 printf("%s", blank);
 
-                for (i = 0; i < 2000; i++)
+                for (i = 0; i < 20; i++)
                 {
                         sys_move_cursor(1, print_location);
                         printf("> [TASK] Applying for a lock %d.\n", i);
@@ -50,7 +50,7 @@ void lock_task1(void)
                 mutex_lock_acquire(&mutex_lock);
 #endif
 
-                for (i = 0; i < 20000; i++)
+                for (i = 0; i < 200; i++)
                 {
                         sys_move_cursor(1, print_location);
                         printf("> [TASK] Has acquired lock and running.(%d)\n", i);
@@ -94,7 +94,7 @@ void lock_task2(void)
                 sys_move_cursor(1, print_location);
                 printf("%s", blank);
 
-                for (i = 0; i < 2000; i++)
+                for (i = 0; i < 20; i++)
                 {
                         sys_move_cursor(1, print_location);
                         printf("> [TASK] Applying for a lock. %d\n", i);
@@ -108,7 +108,7 @@ void lock_task2(void)
                 mutex_lock_acquire(&mutex_lock);
 #endif
 
-                for (i = 0; i < 20000; i++)
+                for (i = 0; i < 200; i++)
                 {
                         sys_move_cursor(1, print_location);
                         printf("> [TASK] Has acquired lock and running.(%d)\n", i);

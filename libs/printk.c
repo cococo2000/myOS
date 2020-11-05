@@ -230,7 +230,6 @@ int printf(const char *fmt, ...)
 
 	buff[ret] = '\0';
 	sys_write(buff);
-	sys_reflush();
 	// screen_reflush();
 	return ret;
 }

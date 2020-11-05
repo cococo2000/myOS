@@ -12,7 +12,7 @@
 void system_call_helper(uint64_t fn, uint64_t arg1, uint64_t arg2, uint64_t arg3)
 {
     uint64_t ret_val = syscall[fn] (arg1,arg2,arg3);
-    // current_running->user_context.regs[2] = ret_val;
+    current_running->user_context.regs[2] = ret_val;
     // current_running->user_context.cp0_epc += 4;
 }
 
