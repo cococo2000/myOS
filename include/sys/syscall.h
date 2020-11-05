@@ -44,6 +44,9 @@
 #define SYSCALL_PS 5
 #define SYSCALL_GETPID 6
 
+#define SYSCALL_GET_TIMER 7
+#define SYSCALL_YIELD 8
+
 #define SYSCALL_WRITE 20
 #define SYSCALL_READ 21
 #define SYSCALL_CURSOR 22
@@ -137,5 +140,8 @@ int sys_fwrite(uint32_t, char *, uint32_t);
 int sys_fread(uint32_t, char *, uint32_t);
 int sys_close(uint32_t);
 int sys_cat(char *);
+
+uint32_t sys_get_timer();
+void sys_yield();
 
 #endif

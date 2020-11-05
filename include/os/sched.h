@@ -65,6 +65,12 @@ typedef enum task_type
     USER_THREAD,
 } task_type_t;
 
+typedef enum kernel_state
+{
+    USER_MODE,
+    KERNEL_MODE,
+} kernel_state_t;
+
 /* Process Control Block */
 typedef struct pcb
 {
@@ -84,7 +90,7 @@ typedef struct pcb
     /* process id */
     pid_t pid;
     /* task in which queue */
-    
+    queue_t * which_queue;
     /* What tasks are blocked by me, the tasks in this 
      * queue need to be unblocked when I do_exit(). */
 
@@ -96,6 +102,8 @@ typedef struct pcb
     task_type_t type;
     /* BLOCK | READY | RUNNING */
     task_status_t status;
+    /* KERNEL | USER */
+    kernel_state_t mode;
     /* cursor position */
     int cursor_x;
     int cursor_y;

@@ -34,10 +34,12 @@ void other_exception_handler()
 
 void interrupt_helper(uint32_t status, uint32_t cause)
 {
+    current_running->mode = KERNEL_MODE;
     uint32_t interrupt = status & cause & 0x0000ff00; // status_IM[7:0] & cause_IP[7:0]
     if(interrupt & 0x00008000){
         irq_timer();
     }else{
         other_exception_handler();
     }
+    current_running->mode = USER_MODE;
 }

@@ -11,9 +11,10 @@
 
 void system_call_helper(uint64_t fn, uint64_t arg1, uint64_t arg2, uint64_t arg3)
 {
+    current_running->mode = KERNEL_MODE;
     uint64_t ret_val = syscall[fn] (arg1,arg2,arg3);
     current_running->user_context.regs[2] = ret_val;
-    // current_running->user_context.cp0_epc += 4;
+    current_running->mode = USER_MODE;
 }
 
 void sys_spawn(task_info_t *info)
@@ -174,4 +175,12 @@ void sys_net_send(uint64_t td, uint64_t td_phy)
 
 void sys_init_mac()
 {
+}
+
+uint32_t sys_get_timer(){
+    return invoke_syscall(SYSCALL_GET_TIMER, IGNORE, IGNORE, IGNORE);
+}
+
+void sys_yield(){
+    invoke_syscall(SYSCALL_YIELD, IGNORE, IGNORE, IGNORE);
 }

@@ -35,6 +35,7 @@
 #include "smp.h"
 #include "mm.h"
 #include "mac.h"
+#include "time.h"
 
 #define TASK_INIT (00)
 #define STACK_MAX 0xffffffffa0f00000
@@ -74,7 +75,9 @@ static void init_pcb()
     pcb[cur_queue_id].priority = 1;
     strcpy(pcb[cur_queue_id].name, "task0 ");
     pcb[cur_queue_id].pid = process_id++;
+    pcb[cur_queue_id].type = KERNEL_PROCESS;
     pcb[cur_queue_id].status = TASK_RUNNING;
+    pcb[cur_queue_id].mode = KERNEL_MODE;
     pcb[cur_queue_id].cursor_x = 0;
     pcb[cur_queue_id].cursor_y = 0;
     pcb[cur_queue_id].sleep_begin_time = 0;
@@ -110,6 +113,7 @@ static void init_pcb()
             pcb[cur_queue_id].pid = process_id++;
             pcb[cur_queue_id].type = p_task_info[j][i]->type;
             pcb[cur_queue_id].status = TASK_READY;
+            pcb[cur_queue_id].mode = USER_MODE;
             pcb[cur_queue_id].cursor_x = 0;
             pcb[cur_queue_id].cursor_y = 0;
             pcb[cur_queue_id].sleep_begin_time = 0;
@@ -158,6 +162,8 @@ static void init_syscall(void)
     syscall[SYSCALL_MUTEX_LOCK_INIT] = (uint64_t (*)())do_mutex_lock_init;
     syscall[SYSCALL_MUTEX_LOCK_ACQUIRE] = (uint64_t (*)())do_mutex_lock_acquire;
     syscall[SYSCALL_MUTEX_LOCK_RELEASE] = (uint64_t (*)())do_mutex_lock_release;
+    syscall[SYSCALL_GET_TIMER] = (uint64_t (*)())get_timer;
+    syscall[SYSCALL_YIELD] = (uint64_t (*)())do_scheduler;
 }
 
 /* [0] The beginning of everything >_< */
