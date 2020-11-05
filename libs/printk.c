@@ -43,7 +43,7 @@
 #include "stdarg.h"
 #include "screen.h"
 #include "syscall.h"
-
+#include "sched.h"
 static unsigned int
 mini_strlen(const char *s)
 {
@@ -205,33 +205,45 @@ end:
 
 int printk(const char *fmt, ...)
 {
-	int ret;
-	va_list va;
-	char buff[256];
+	if(current_running->mode == KERNEL_MODE){
+		int ret;
+		va_list va;
+		char buff[256];
 
-	va_start(va, fmt);
-	ret = mini_vsnprintf(buff, 256, fmt, va);
-	va_end(va);
+		va_start(va, fmt);
+		ret = mini_vsnprintf(buff, 256, fmt, va);
+		va_end(va);
 
-	buff[ret] = '\0';
-	port_write(buff);
-	return ret;
+		buff[ret] = '\0';
+		port_write(buff);
+		return ret;
+	}else{
+		// error
+		char * input = (char *)0x123456;
+		char c = (*input);
+	}
 }
 
 int printf(const char *fmt, ...)
 {
-	int ret;
-	va_list va;
-	char buff[256];
+	if(current_running->mode == USER_MODE){
+		int ret;
+		va_list va;
+		char buff[256];
 
-	va_start(va, fmt);
-	ret = mini_vsnprintf(buff, 256, fmt, va);
-	va_end(va);
+		va_start(va, fmt);
+		ret = mini_vsnprintf(buff, 256, fmt, va);
+		va_end(va);
 
-	buff[ret] = '\0';
-	sys_write(buff);
-	// screen_reflush();
-	return ret;
+		buff[ret] = '\0';
+		sys_write(buff);
+		// screen_reflush();
+		return ret;
+	}else{
+		// error
+		char * input = (char *)0xba000;
+		char c = (*input);
+	}
 }
 
 int kprintf(const char *fmt, ...)

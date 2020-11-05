@@ -175,7 +175,7 @@ LEAF(get_cp0_compare)
 END(get_cp0_compare)
 
 LEAF(get_cp0_epc)
-    mfc0 v0, CP0_EPC
+    dmfc0 v0, CP0_EPC
     jr ra
 END(get_cp0_epc)
 
@@ -215,9 +215,9 @@ NESTED(handle_int, 0, sp)
 END(handle_int)
 
 NESTED(handle_syscall, 0, sp)
-    mfc0 k0, CP0_EPC
-    addi k0, k0, 0x4
-    mtc0 k0, CP0_EPC
+    dmfc0 k0, CP0_EPC
+    daddi k0, k0, 0x4
+    dmtc0 k0, CP0_EPC
     SAVE_CONTEXT(USER)
     move a3, a2
     move a2, a1
@@ -233,6 +233,12 @@ NESTED(handle_tlb, 0, sp)
 END(handle_tlb)
 
 NESTED(handle_other, 0, sp)
+    dmfc0 k0, CP0_EPC
+    daddi k0, k0, 0x4
+    dmtc0 k0, CP0_EPC
+    SAVE_CONTEXT(USER)
+    jal     interrupt_helper
+    nop
     j   exception_handler_exit
 END(handle_other)
 
@@ -255,7 +261,8 @@ LEAF(set_cp0_index)
 END(set_cp0_index)
 
 LEAF(get_cp0_badvaddr)
-    
+    dmfc0 v0, CP0_BADVADDR
+    jr ra
 END(get_cp0_badvaddr)
 
 LEAF(get_cp0_entrylo0)

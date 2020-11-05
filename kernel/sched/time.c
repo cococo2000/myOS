@@ -1,4 +1,6 @@
+#include "type.h"
 #include "time.h"
+#include "sched.h"
 
 uint32_t time_elapsed = 0;
 
@@ -11,7 +13,13 @@ uint32_t get_ticks()
 
 uint32_t get_timer()
 {
-    return time_elapsed / (10000000);
+    if(current_running->mode == KERNEL_MODE){
+        return time_elapsed / (10000000);
+    }else{
+        // error
+        char * input = (char *)0x123456;
+        char c = (*input);
+    }
 }
 
 void latency(uint32_t time)

@@ -66,6 +66,7 @@ static void init_pcb()
     bzero(&pcb[cur_queue_id], sizeof(pcb_t));
     pcb[cur_queue_id].kernel_stack_top = stack_top;
     pcb[cur_queue_id].kernel_context.regs[29] = stack_top;
+    pcb[cur_queue_id].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
     stack_top -= PCB_STACK_SIZE;
     pcb[cur_queue_id].kernel_context.cp0_status = initial_cp0_status;
     pcb[cur_queue_id].user_stack_top = stack_top;
@@ -171,6 +172,11 @@ void __attribute__((section(".entry_function"))) _start(void)
 {
     asm_start();
 
+    /* init Process Control Block */
+    init_pcb();
+    // current_running->mode = KERNEL_MODE;
+    printk("> [INIT] PCB initialization succeeded.\n");
+
     /* init stack space */
     init_stack();
     printk("> [INIT] Stack heap initialization succeeded.\n");
@@ -183,14 +189,8 @@ void __attribute__((section(".entry_function"))) _start(void)
     printk("> [INIT] Virtual memory initialization succeeded.\n");
     // init system call table (0_0)
     /* init system call table */
-
     init_syscall();
     printk("> [INIT] System call initialized successfully.\n");
-
-    /* init Process Control Block */
-
-    init_pcb();
-    printk("> [INIT] PCB initialization succeeded.\n");
 
     /* init screen */
     init_screen();

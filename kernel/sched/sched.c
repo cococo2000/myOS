@@ -80,28 +80,34 @@ static void check_sleeping()
 
 void scheduler(void)
 {
-    current_running->cursor_x = screen_cursor_x;
-    current_running->cursor_y = screen_cursor_y;
+    // if(current_running->mode == KERNEL_MODE){
+        current_running->cursor_x = screen_cursor_x;
+        current_running->cursor_y = screen_cursor_y;
 
-    check_sleeping();
-    if(current_running->status != TASK_BLOCKED){
-        current_running->status = TASK_READY;
-        if(current_running->pid != 1){
-            queue_push(&ready_queue, current_running);
+        check_sleeping();
+        if(current_running->status != TASK_BLOCKED){
+            current_running->status = TASK_READY;
+            if(current_running->pid != 1){
+                queue_push(&ready_queue, current_running);
+            }
         }
-    }
-    if(!queue_is_empty(&ready_queue)){
-        current_running = (pcb_t *)queue_dequeue(&ready_queue);
-    }
-    current_running->status = TASK_RUNNING;
+        if(!queue_is_empty(&ready_queue)){
+            current_running = (pcb_t *)queue_dequeue(&ready_queue);
+        }
+        current_running->status = TASK_RUNNING;
 
-    current_running->count += 1;
-    // vt100_move_cursor(1, 12);
-    // printk("current_running -> %s", current_running->name);
-    // vt100_move_cursor(1, current_running->pid + 12);
-    // printk("> %s\t times: %d", current_running->name, current_running->count);
-    screen_cursor_x = current_running->cursor_x;
-    screen_cursor_y = current_running->cursor_y;
+        current_running->count += 1;
+        // vt100_move_cursor(1, 12);
+        // printk("current_running -> %s", current_running->name);
+        // vt100_move_cursor(1, current_running->pid + 12);
+        // printk("> %s\t times: %d", current_running->name, current_running->count);
+        screen_cursor_x = current_running->cursor_x;
+        screen_cursor_y = current_running->cursor_y;
+    // }else{
+    //     // error
+    //     char * input = (char *)0x123456;
+    //     char c = (*input);
+    // }
 }
 
 void do_sleep(uint32_t sleep_time)
