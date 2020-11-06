@@ -99,3 +99,21 @@ void *queue_remove(queue_t *queue, void *item)
 
     return (void *)next;
 }
+
+void *priority_queue_dequeue(queue_t *queue)
+{
+    item_t *temp = (item_t *)queue->head;
+    item_t *max_priority = temp;
+    uint32_t max_priority_value = temp->priority;
+    while(temp != NULL){
+        temp->priority += 1;
+        if(temp->priority > max_priority_value){
+            max_priority = temp;
+            max_priority_value = temp->priority;
+        }
+        temp = temp->next;
+    }
+    // head
+    queue_remove(queue, max_priority);
+    return (void *)max_priority;
+}

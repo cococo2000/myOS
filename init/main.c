@@ -50,6 +50,8 @@ extern struct task_info *timer_tasks[16];
 extern int num_timer_tasks;
 extern struct task_info *sched2_tasks[16];
 extern int num_sched2_tasks;
+
+// #include "../test/test_project2/test.h"
 static void init_memory()
 {
 }
@@ -73,6 +75,7 @@ static void init_pcb()
     pcb[cur_queue_id].user_context.regs[29] = stack_top;
     stack_top -= PCB_STACK_SIZE;
     pcb[cur_queue_id].user_context.cp0_status = initial_cp0_status;
+    pcb[cur_queue_id].base_priority = 1;
     pcb[cur_queue_id].priority = 1;
     strcpy(pcb[cur_queue_id].name, "task0 ");
     pcb[cur_queue_id].pid = process_id++;
@@ -109,6 +112,7 @@ static void init_pcb()
             // init other data
             pcb[cur_queue_id].prev = NULL;
             pcb[cur_queue_id].next = NULL;
+            pcb[cur_queue_id].base_priority = p_task_info[j][i]->base_priority;
             pcb[cur_queue_id].priority = 1;
             strcpy(pcb[cur_queue_id].name, p_task_info[j][i]->name);
             pcb[cur_queue_id].pid = process_id++;

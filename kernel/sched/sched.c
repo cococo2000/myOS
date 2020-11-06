@@ -24,7 +24,7 @@ static int user_stack_count;
 
 void init_stack()
 {
-     
+    
 }
 
 uint64_t new_kernel_stack()
@@ -34,17 +34,17 @@ uint64_t new_kernel_stack()
 
 uint64_t new_user_stack()
 {
-     
+    
 }
 
 static void free_kernel_stack(uint64_t stack_addr)
 {
-     
+    
 }
 
 static void free_user_stack(uint64_t stack_addr)
 {
-     
+    
 }
 
 /* Process Control Block */
@@ -80,7 +80,8 @@ static void check_sleeping()
 
 void scheduler(void)
 {
-    // if(current_running->mode == KERNEL_MODE){
+    if(current_running->mode == KERNEL_MODE){
+        // store the cursor
         current_running->cursor_x = screen_cursor_x;
         current_running->cursor_y = screen_cursor_y;
 
@@ -92,22 +93,25 @@ void scheduler(void)
             }
         }
         if(!queue_is_empty(&ready_queue)){
-            current_running = (pcb_t *)queue_dequeue(&ready_queue);
+            current_running = (pcb_t *)priority_queue_dequeue(&ready_queue);
         }
         current_running->status = TASK_RUNNING;
+        current_running->priority = current_running->base_priority;
 
         current_running->count += 1;
         // vt100_move_cursor(1, 12);
         // printk("current_running -> %s", current_running->name);
         // vt100_move_cursor(1, current_running->pid + 12);
         // printk("> %s\t times: %d", current_running->name, current_running->count);
+
+        // reset the cursor
         screen_cursor_x = current_running->cursor_x;
         screen_cursor_y = current_running->cursor_y;
-    // }else{
-    //     // error
-    //     char * input = (char *)0x123456;
-    //     char c = (*input);
-    // }
+    }else{
+        // error
+        char * input = (char *)0x123456;
+        char c = (*input);
+    }
 }
 
 void do_sleep(uint32_t sleep_time)

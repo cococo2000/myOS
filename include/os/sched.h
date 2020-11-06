@@ -84,7 +84,8 @@ typedef struct pcb
     struct pcb * prev;
     struct pcb * next;
     /* priority */
-    int priority;
+    uint32_t priority;
+    uint32_t base_priority;
     // name
     char name[32];
     /* process id */
@@ -120,6 +121,7 @@ typedef struct task_info
     char name[32];
     uint64_t entry_point;
     task_type_t type;
+    uint32_t base_priority;
 } task_info_t;
 
 /* ready queue to run */
