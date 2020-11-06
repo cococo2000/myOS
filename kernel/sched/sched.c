@@ -98,18 +98,19 @@ void scheduler(void)
         current_running->status = TASK_RUNNING;
         current_running->priority = current_running->base_priority;
 
+        // be schedulered times count ++
         current_running->count += 1;
         // vt100_move_cursor(1, 12);
+        // printk("the last do_scheduler() cost time: %d us", current_running->do_scheduler_cost / 150);
         // printk("current_running -> %s", current_running->name);
         // vt100_move_cursor(1, current_running->pid + 12);
         // printk("> %s\t times: %d", current_running->name, current_running->count);
-
         // reset the cursor
         screen_cursor_x = current_running->cursor_x;
         screen_cursor_y = current_running->cursor_y;
     }else{
         // error
-        char * input = (char *)0x123456;
+        char * input = (char *)0x123455;
         char c = (*input);
     }
 }

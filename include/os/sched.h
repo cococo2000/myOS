@@ -80,6 +80,10 @@ typedef struct pcb
     /* stack top */
     uint64_t kernel_stack_top;
     uint64_t user_stack_top;
+
+    // store the last do_scheduler time
+    // uint64_t do_scheduler_cost;
+
     /* previous, next pointer */
     struct pcb * prev;
     struct pcb * next;

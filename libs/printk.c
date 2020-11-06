@@ -219,7 +219,7 @@ int printk(const char *fmt, ...)
 		return ret;
 	}else{
 		// error
-		char * input = (char *)0x123456;
+		char * input = (char *)0x123457;
 		char c = (*input);
 	}
 }

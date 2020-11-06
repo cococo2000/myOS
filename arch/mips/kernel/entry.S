@@ -131,7 +131,9 @@ NESTED(do_scheduler, 0, ra)
 END(do_scheduler)
 
 LEAF(reset_timer)
-    
+    mtc0 a0, CP0_COMPARE
+    mtc0 zero, CP0_COUNT
+    jr ra
 END(reset_timer)
 
 LEAF(set_cp0_count)
