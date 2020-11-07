@@ -113,7 +113,7 @@ static void init_pcb()
             pcb[cur_queue_id].prev = NULL;
             pcb[cur_queue_id].next = NULL;
             pcb[cur_queue_id].base_priority = p_task_info[j][i]->base_priority;
-            pcb[cur_queue_id].priority = 1;
+            pcb[cur_queue_id].priority = p_task_info[j][i]->base_priority;
             strcpy(pcb[cur_queue_id].name, p_task_info[j][i]->name);
             pcb[cur_queue_id].pid = process_id++;
             pcb[cur_queue_id].type = p_task_info[j][i]->type;
