@@ -5,3 +5,4 @@ disk
 main
 kernel.txt
 *.o
+.vscode

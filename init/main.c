@@ -42,16 +42,7 @@
 #define STACK_MIN 0xffffffffa0d00000
 #define PCB_STACK_SIZE 0x10000
 uint64_t stack_top = STACK_MAX;
-extern struct task_info *sched1_tasks[16];
-extern int num_sched1_tasks;
-extern struct task_info *lock_tasks[16];
-extern int num_lock_tasks;
-extern struct task_info *timer_tasks[16];
-extern int num_timer_tasks;
-extern struct task_info *sched2_tasks[16];
-extern int num_sched2_tasks;
 
-// #include "../test/test_project2/test.h"
 static void init_memory()
 {
 }

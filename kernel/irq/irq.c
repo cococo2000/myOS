@@ -11,8 +11,6 @@ uint32_t initial_cp0_status = 0x10008001;
 
 // extern void do_shell();
 
-extern uint32_t time_elapsed;
-
 // to measure do_scheduler() cost
 uint32_t cost = 0;
 uint32_t sum = 0;
