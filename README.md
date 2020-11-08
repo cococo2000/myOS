@@ -12,21 +12,11 @@ A repository for OSLab-MIPS 2020 in UCAS.
 
 ### 主要模块
 
-###### /arch/mips/boot/bootblock.S 实现bootloader引导kernel的功能（重定位+大核加载）
+/arch/mips/boot/bootblock.S 实现bootloader引导kernel的功能（重定位+大核加载）
 
-###### /test/kernel.c实现一个小的操作系统内核，具有打印字符串和回显输入字符的功能
+/test/kernel.c实现一个小的操作系统内核，具有打印字符串和回显输入字符的功能
 
-###### /tools/createimage.c实现将bootblock和kernel合并为一个完整SD卡镜像文件。
-
-### 代码合集(/code)
-
-##### /basic
-
-task1-3 仅支持小核加载（一个扇区）
-
-##### /bonus
-
-task3 并支持大核加载和重定位
+/tools/createimage.c实现将bootblock和kernel合并为一个完整SD卡镜像文件。
 
 ### 运行
 
@@ -54,3 +44,4 @@ task3 并支持大核加载和重定位
 
 8. ##### done！
 
+## Project2 Simple Kernel
