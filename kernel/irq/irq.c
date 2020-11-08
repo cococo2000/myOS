@@ -50,6 +50,7 @@ static void irq_timer()
         screen_cursor_x = temp_x;
         screen_cursor_y = temp_y;
         count = 0;
+        sum = 0;
     }
     cost = get_cp0_count();
     do_scheduler();
