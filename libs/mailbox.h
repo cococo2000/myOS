@@ -8,8 +8,11 @@
 
 typedef struct mailbox
 {
-    
-
+    char name[32];
+    char buffer[MAX_MBOX_LENGTH];
+    condition_t full;
+    condition_t empty;
+    mutex_lock_t lock;
 } mailbox_t;
 
 
