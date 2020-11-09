@@ -200,7 +200,7 @@ void __attribute__((section(".entry_function"))) _start(void)
     /* set cp0_status register to allow interrupt */
     // enable exception and interrupt
     // ERL = 0, EXL = 0, IE = 1
-    set_cp0_status(initial_cp0_status);
+    set_cp0_status(0x10008001);
 
     while (1)
     {

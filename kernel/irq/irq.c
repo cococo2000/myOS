@@ -7,7 +7,7 @@
 uint64_t exception_handler[32];
 
 /* used to init PCB */
-uint32_t initial_cp0_status = 0x10008001;
+uint32_t initial_cp0_status = 0x10008003;
 
 // extern void do_shell();
 
