@@ -87,6 +87,119 @@ static struct task_info *test_tasks[NUM_MAX_TASK] = {
 
 #endif
 
+static void disable_interrupt(){
+    uint32_t cp0_status = get_cp0_status();
+    cp0_status &= 0xfffffffe;
+    set_cp0_status(cp0_status);
+}
+
+static void enable_interrupt(){
+    uint32_t cp0_status = get_cp0_status();
+    cp0_status |= 0x01;
+    set_cp0_status(cp0_status);
+}
+
+static char read_uart_ch(void){
+    char ch = 0;
+    char *read_port = (char *)0xffffffffbfe00000;
+    volatile char *state = (char *)0xffffffffbfe00005;  // serial port state register
+    while ((*state) & 0x01) {
+        ch = *read_port;
+    }
+    return ch;
+}
+
+void execute(uint32_t argc, char argv[][10])
+{
+    if (argc == 1) {
+        if (!strcmp(argv[0], "ps")) {
+            sys_ps();
+        }
+        else if (!strcmp(argv[0], "clear")){
+            sys_clear();
+        }
+        else {
+            printf("Command '%s' not found,!\n", argv[0]);
+        }
+    }
+    else if (argc == 2) {
+        int pid = itoa((char *)argv[1]);
+        if (!strcmp(argv[0], "exec")) {
+            printf("exec process[%d]\n", pid - 1);
+            sys_spawn(test_tasks[pid - 1]);
+        }
+        else if (!strcmp(argv[0], "kill")) {
+            printf("kill process pid = %d\n", pid);
+            sys_kill(pid);
+        }
+        else if (!strcmp(argv[0], "clear") && !strcmp(argv[1], "all")) {
+            sys_clear_all();
+        }
+        else {
+            printf("Command '%s' not found,!\n", argv[0]);
+        }
+    }
+    else if (argc) {
+        printf("Command '%s' not found,!\n", argv[0]);
+    }
+}
+
 void test_shell()
 {
+    char command[20];
+    uint32_t argc;
+    char argv[3][10];
+    uint32_t i = 0;
+    uint32_t j, k;
+    sys_move_cursor(0, SCREEN_HEIGHT / 2);
+    printf("-------------------------    UCAS_OS    --------------------------\n");
+    printf("> root@UCAS_OS:");
+    while (1) {
+        disable_interrupt();
+        char ch = read_uart_ch();
+        enable_interrupt();
+        // NULL or (BackSpace or Delete) at begin
+        if (ch == 0 || (i == 0 && (ch == 0x8 || ch == 0x7f)))
+        {
+            continue;
+        }
+        printf("%c", ch);
+        // Enter '\r'
+        if (ch != '\r') {
+            // backspace and delete(TODO)
+            if (ch == 0x8 || ch == 0x7f) {
+                i--;
+            } else {
+                command[i++] = ch;
+            }
+            continue;
+        } else {
+            command[i] = ' ';
+            command[++i] = '\0';
+            // to generate argc and argv[]
+            // argc: number of arguments, argv[]: arguments
+            j = 0;
+            // skip blank (' ')
+            while (command[j] == ' ' && j < i) {
+                j++;
+            }
+            for (argc = 0, k = 0; j < i; j++) {
+                if (command[j] == ' ') {
+                    // skip blank (' '), a new argv begin
+                    while (command[j] == ' ' && j < i) {
+                        j++;
+                    }
+                    argv[argc][k] = '\0';
+                    argc++;
+                    k = 0;
+                }
+                argv[argc][k++] = command[j];
+            }
+            execute(argc, argv);
+            // one cammand done, reset i
+            i = 0;
+            printf(">root@UCAS_OS: ");
+        }
+    }
+
 }
