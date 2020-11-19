@@ -89,7 +89,7 @@ void scheduler(void)
         check_sleeping();
         if(current_running->status != TASK_BLOCKED){
             current_running->status = TASK_READY;
-            if(current_running->pid != 1){
+            if(current_running->pid != 0){
                 queue_push(&ready_queue, current_running);
             }
         }

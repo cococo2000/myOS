@@ -122,7 +122,7 @@ void screen_clear(int line1, int line2)
 {
     int i, j;
 
-    for (i = 0; i < SCREEN_HEIGHT; i++)
+    for (i = line1; i < line2; i++)
     {
         for (j = 0; j < SCREEN_WIDTH; j++)
         {

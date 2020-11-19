@@ -39,21 +39,21 @@ static void irq_timer()
     // }
 
     /* sched.c to do scheduler */
-    if(count == 1000){
-        temp_x = screen_cursor_x;
-        temp_y = screen_cursor_y;
-        vt100_move_cursor(1, 12);
-        sum /= 1000;
-        printk("the average do_scheduler() cost: %d ", sum);
-        screen_cursor_x = temp_x;
-        screen_cursor_y = temp_y;
-        count = 0;
-        sum = 0;
-    }
-    cost = get_cp0_count();
+    // if(count == 1000){
+    //     temp_x = screen_cursor_x;
+    //     temp_y = screen_cursor_y;
+    //     vt100_move_cursor(1, 12);
+    //     sum /= 1000;
+    //     printk("the average do_scheduler() cost: %d ", sum);
+    //     screen_cursor_x = temp_x;
+    //     screen_cursor_y = temp_y;
+    //     count = 0;
+    //     sum = 0;
+    // }
+    // cost = get_cp0_count();
     do_scheduler();
-    sum += get_cp0_count() - cost;
-    count++;
+    // sum += get_cp0_count() - cost;
+    // count++;
 }
 
 void other_exception_handler()

@@ -42,7 +42,7 @@
 // extern struct task_info shell_task;
 // extern struct task_info *shell_tasks[16];
 // extern int num_shell_tasks;
-
+uint64_t stack_top = STACK_MAX;
 static void init_memory()
 {
 }

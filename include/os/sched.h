@@ -39,8 +39,7 @@
 #define STACK_MAX 0xffffffffa0f00000
 #define STACK_MIN 0xffffffffa0d00000
 #define PCB_STACK_SIZE 0x10000
-
-uint64_t stack_top = STACK_MAX;
+extern uint64_t stack_top;
 /* used to save register infomation */
 typedef struct regs_context
 {

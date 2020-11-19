@@ -122,11 +122,11 @@ void execute(uint32_t argc, char argv[][10])
             sys_screen_clear();
         }
         else {
-            printf("Command '%s' not found,!\n", argv[0]);
+            printf("Command '%s' not found!\n", argv[0]);
         }
     }
     else if (argc == 2) {
-        int pid = argv[1][0] - '0';
+        int pid = argv[1][0] - '0';// TODO:
         if (!strcmp(argv[0], "exec")) {
             printf("exec process[%d]\n", pid - 1);
             sys_spawn(test_tasks[pid - 1]);
@@ -136,11 +136,11 @@ void execute(uint32_t argc, char argv[][10])
             sys_kill(pid);
         }
         else {
-            printf("Command '%s' not found,!\n", argv[0]);
+            printf("Command '%s' not found!\n", argv[0]);
         }
     }
     else if (argc) {
-        printf("Command '%s' not found,!\n", argv[0]);
+        printf("Command '%s' not found!\n", argv[0]);
     }
 }
 
@@ -152,15 +152,23 @@ void test_shell()
     uint32_t i = 0;
     uint32_t j, k;
     sys_move_cursor(0, SCREEN_HEIGHT / 2);
-    printf("-------------------------    UCAS_OS    --------------------------\n");
+    printf("-------------------------    COMMAND    --------------------------\n");
     printf("> root@UCAS_OS:");
     while (1) {
         disable_interrupt();
         char ch = read_uart_ch();
         enable_interrupt();
         // NULL or (BackSpace or Delete) at begin
-        if (ch == 0 || (i == 0 && (ch == 0x8 || ch == 0x7f)))
-        {
+        if (ch == 0 || (i == 0 && (ch == 0x8 || ch == 0x7f))) {
+            continue;
+        }
+        // delete TODO:
+        else if (i && (ch == 0x8 || ch == 0x7f)) {
+            i--;
+            screen_cursor_x --;
+            sys_move_cursor(screen_cursor_x, screen_cursor_y);
+            printf(" ");
+            screen_cursor_x --;
             continue;
         }
         printf("%c", ch);
@@ -198,7 +206,7 @@ void test_shell()
             execute(argc, argv);
             // one cammand done, reset i
             i = 0;
-            printf(">root@UCAS_OS: ");
+            printf("> root@UCAS_OS: ");
         }
     }
 
