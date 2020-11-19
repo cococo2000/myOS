@@ -116,20 +116,6 @@ void scheduler(void)
     }
 }
 
-void do_sleep(uint32_t sleep_time)
-{
-    current_running->status = TASK_BLOCKED;
-    current_running->sleep_begin_time = get_timer();
-    current_running->sleep_end_time = current_running->sleep_begin_time + sleep_time;
-    queue_push(&block_queue, current_running);
-    do_scheduler();
-}
-
-void do_exit(void)
-{
-    
-}
-
 void do_block(queue_t *queue)
 {
     current_running->status = TASK_BLOCKED;
@@ -161,22 +147,23 @@ int do_spawn(task_info_t *task)
     // init kernel_context and stack
     pcb[process_id].kernel_stack_top = stack_top;
     pcb[process_id].kernel_context.regs[29] = stack_top;
-    stack_top -= PCB_STACK_SIZE;
     pcb[process_id].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
     pcb[process_id].kernel_context.cp0_status = initial_cp0_status;
     pcb[process_id].kernel_context.cp0_epc = task->entry_point;
+    stack_top -= PCB_STACK_SIZE;
     // init user_context and stack
     pcb[process_id].user_stack_top = stack_top;
     pcb[process_id].user_context.regs[29] = stack_top;
-    stack_top -= PCB_STACK_SIZE;
     pcb[process_id].user_context.regs[31] = task->entry_point;
     pcb[process_id].user_context.cp0_status = initial_cp0_status;
     pcb[process_id].user_context.cp0_epc = task->entry_point;
+    stack_top -= PCB_STACK_SIZE;
     // init other data
-    pcb[process_id].prev = NULL;
-    pcb[process_id].next = NULL;
+    pcb[process_id].base_priority = 1;
+    pcb[process_id].priority = 1;
     strcpy(pcb[process_id].name, task->name);
     pcb[process_id].pid = process_id;
+    pcb[process_id].which_queue = &ready_queue;
     pcb[process_id].type = task->type;
     pcb[process_id].status = TASK_READY;
     pcb[process_id].mode = USER_MODE;
@@ -188,6 +175,29 @@ int do_spawn(task_info_t *task)
     // add to ready_queue
     queue_push(&ready_queue, (void *)&pcb[process_id]);
     process_id++;
+}
+
+void do_exit(void)
+{
+    current_running->status = TASK_EXITED;
+    do_unblock_all(&current_running->wait_queue);
+    int i;
+    while (!queue_is_empty(&current_running->lock_queue)) {
+        mutex_lock_t * lock = queue_dequeue(&current_running->lock_queue);
+        do_unblock_all(&lock->queue);
+        lock->status = UNLOCKED;
+    }
+    do_scheduler();
+}
+
+
+void do_sleep(uint32_t sleep_time)
+{
+    current_running->status = TASK_BLOCKED;
+    current_running->sleep_begin_time = get_timer();
+    current_running->sleep_end_time = current_running->sleep_begin_time + sleep_time;
+    queue_push(&block_queue, current_running);
+    do_scheduler();
 }
 
 int do_kill(pid_t pid)
@@ -203,8 +213,23 @@ int do_waitpid(pid_t pid)
 // process show
 void do_process_show()
 {
-
-     
+    printk("[PROCESS TABLE]\n");
+    int num, items = 0;
+    for (num = 0; num < NUM_MAX_TASK; num++) {
+        switch(pcb[num].status) {
+            case TASK_BLOCKED:
+                printk("[%d] PID : %d  Status : BLOCKED\n", items++, pcb[num].pid);
+                break;
+            case TASK_RUNNING:
+                printk("[%d] PID : %d  Status : RUNNING\n", items++, pcb[num].pid);
+                break;
+            case TASK_READY:
+                printk("[%d] PID : %d  Status : READY\n", items++, pcb[num].pid);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 pid_t do_getpid()

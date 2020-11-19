@@ -32,16 +32,19 @@ void do_mutex_lock_acquire(mutex_lock_t *lock)
         do_block(&lock->queue);
         do_scheduler();
     }else{
+        queue_push(&current_running->lock_queue, lock);
         lock->status = LOCKED;
     }
 }
 
 void do_mutex_lock_release(mutex_lock_t *lock)
 {
+    queue_remove(&current_running->lock_queue, lock);
     if(!queue_is_empty(&lock->queue)){
         do_unblock_one(&lock->queue);
         do_scheduler();
     }else{
         lock->status = UNLOCKED;
     }
+
 }

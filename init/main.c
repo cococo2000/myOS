@@ -71,6 +71,7 @@ static void init_pcb()
     pcb[0].pid = 0;
     pcb[0].which_queue = &ready_queue;
     queue_init(&pcb[0].wait_queue);
+    queue_init(&pcb[0].lock_queue);
     pcb[0].type = KERNEL_PROCESS;
     pcb[0].status = TASK_RUNNING;
     pcb[0].mode = KERNEL_MODE;
@@ -99,7 +100,8 @@ static void init_pcb()
     strcpy(pcb[shell_pid].name, "shell ");
     pcb[shell_pid].pid = process_id++;
     pcb[shell_pid].which_queue = &ready_queue;
-    queue_init(&pcb[0].wait_queue);
+    queue_init(&pcb[shell_pid].wait_queue);
+    queue_init(&pcb[shell_pid].lock_queue);
     pcb[shell_pid].type = USER_PROCESS;
     pcb[shell_pid].status = TASK_READY;
     pcb[shell_pid].mode = USER_MODE;

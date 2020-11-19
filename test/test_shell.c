@@ -128,11 +128,11 @@ void execute(uint32_t argc, char argv[][10])
     else if (argc == 2) {
         int pid = argv[1][0] - '0';// TODO:
         if (!strcmp(argv[0], "exec")) {
-            printf("exec process[%d]\n", pid - 1);
-            sys_spawn(test_tasks[pid - 1]);
+            printf("exec process[%d].\n", pid);
+            sys_spawn(&test_tasks[pid]);
         }
         else if (!strcmp(argv[0], "kill")) {
-            printf("kill process pid = %d\n", pid);
+            printf("kill process pid = %d.\n", pid);
             sys_kill(pid);
         }
         else {

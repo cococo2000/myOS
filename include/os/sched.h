@@ -35,7 +35,7 @@
 
 #define NUM_MAX_TASK 32
 #define CORE_NUM 2
-#define NUM_LOCK 4
+#define LOCK_MAX 4
 #define STACK_MAX 0xffffffffa0f00000
 #define STACK_MIN 0xffffffffa0d00000
 #define PCB_STACK_SIZE 0x10000
@@ -105,7 +105,7 @@ typedef struct pcb
     /* block related */
     queue_t wait_queue;
     /* holding lock */
-    mutex_lock_t * lock[NUM_LOCK];
+    queue_t lock_queue;
     /* kernel/user thread/process */
     task_type_t type;
     /* BLOCK | READY | RUNNING */

@@ -44,6 +44,8 @@ typedef struct mutex_lock
 {
     lock_status_t status;
     queue_t queue;
+    struct mutex_lock * prev;
+    struct mutex_lock * next;
 } mutex_lock_t;
 
 /* init lock */
