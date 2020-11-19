@@ -43,6 +43,10 @@
 #define PCB_STACK_SIZE 0x10000
 uint64_t stack_top = STACK_MAX;
 
+extern struct task_info shell_task;
+extern struct task_info *shell_tasks[16];
+extern int num_shell_tasks;
+
 static void init_memory()
 {
 }
@@ -50,7 +54,6 @@ static void init_pcb()
 {
     queue_init(&ready_queue);
     queue_init(&block_queue);
-    // queue_init(&sleep_queue);
     int num_total_tasks_groups = 3;
     int each_tasks_num[4] = {num_lock_tasks, num_timer_tasks, num_sched2_tasks};
     struct task_info ** p_task_info[4] = {lock_tasks, timer_tasks, sched2_tasks};
@@ -79,46 +82,46 @@ static void init_pcb()
     pcb[cur_queue_id].sleep_end_time = 0;
     pcb[cur_queue_id].count = 0;
     cur_queue_id++;
-    //scheduler1 task1
-    int i, j;
-    for(j = 0; j < num_total_tasks_groups; j++){
-        for(i = 0; i < each_tasks_num[j]; i++, cur_queue_id++)
-        {
-            // init pcb all 0
-            bzero(&pcb[cur_queue_id], sizeof(pcb_t));
-            // init kernel_context and stack
-            pcb[cur_queue_id].kernel_stack_top = stack_top;
-            pcb[cur_queue_id].kernel_context.regs[29] = stack_top;
-            stack_top -= PCB_STACK_SIZE;
-            pcb[cur_queue_id].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
-            pcb[cur_queue_id].kernel_context.cp0_status = initial_cp0_status;
-            pcb[cur_queue_id].kernel_context.cp0_epc = p_task_info[j][i]->entry_point;
-            // init user_context and stack
-            pcb[cur_queue_id].user_stack_top = stack_top;
-            pcb[cur_queue_id].user_context.regs[29] = stack_top;
-            stack_top -= PCB_STACK_SIZE;
-            pcb[cur_queue_id].user_context.regs[31] = p_task_info[j][i]->entry_point;
-            pcb[cur_queue_id].user_context.cp0_status = initial_cp0_status;
-            pcb[cur_queue_id].user_context.cp0_epc = p_task_info[j][i]->entry_point;
-            // init other data
-            pcb[cur_queue_id].prev = NULL;
-            pcb[cur_queue_id].next = NULL;
-            pcb[cur_queue_id].base_priority = p_task_info[j][i]->base_priority;
-            pcb[cur_queue_id].priority = p_task_info[j][i]->base_priority;
-            strcpy(pcb[cur_queue_id].name, p_task_info[j][i]->name);
-            pcb[cur_queue_id].pid = process_id++;
-            pcb[cur_queue_id].type = p_task_info[j][i]->type;
-            pcb[cur_queue_id].status = TASK_READY;
-            pcb[cur_queue_id].mode = USER_MODE;
-            pcb[cur_queue_id].cursor_x = 0;
-            pcb[cur_queue_id].cursor_y = 0;
-            pcb[cur_queue_id].sleep_begin_time = 0;
-            pcb[cur_queue_id].sleep_end_time = 0;
-            pcb[cur_queue_id].count = 0;
-            // add to ready_queue
-            queue_push(&ready_queue, (void *)&pcb[cur_queue_id]);
-        }
-    }
+    // for project 2 init_pcb
+    // int i, j;
+    // for(j = 0; j < num_total_tasks_groups; j++){
+    //     for(i = 0; i < each_tasks_num[j]; i++, cur_queue_id++)
+    //     {
+    //         // init pcb all 0
+    //         bzero(&pcb[cur_queue_id], sizeof(pcb_t));
+    //         // init kernel_context and stack
+    //         pcb[cur_queue_id].kernel_stack_top = stack_top;
+    //         pcb[cur_queue_id].kernel_context.regs[29] = stack_top;
+    //         stack_top -= PCB_STACK_SIZE;
+    //         pcb[cur_queue_id].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
+    //         pcb[cur_queue_id].kernel_context.cp0_status = initial_cp0_status;
+    //         pcb[cur_queue_id].kernel_context.cp0_epc = p_task_info[j][i]->entry_point;
+    //         // init user_context and stack
+    //         pcb[cur_queue_id].user_stack_top = stack_top;
+    //         pcb[cur_queue_id].user_context.regs[29] = stack_top;
+    //         stack_top -= PCB_STACK_SIZE;
+    //         pcb[cur_queue_id].user_context.regs[31] = p_task_info[j][i]->entry_point;
+    //         pcb[cur_queue_id].user_context.cp0_status = initial_cp0_status;
+    //         pcb[cur_queue_id].user_context.cp0_epc = p_task_info[j][i]->entry_point;
+    //         // init other data
+    //         pcb[cur_queue_id].prev = NULL;
+    //         pcb[cur_queue_id].next = NULL;
+    //         pcb[cur_queue_id].base_priority = p_task_info[j][i]->base_priority;
+    //         pcb[cur_queue_id].priority = p_task_info[j][i]->base_priority;
+    //         strcpy(pcb[cur_queue_id].name, p_task_info[j][i]->name);
+    //         pcb[cur_queue_id].pid = process_id++;
+    //         pcb[cur_queue_id].type = p_task_info[j][i]->type;
+    //         pcb[cur_queue_id].status = TASK_READY;
+    //         pcb[cur_queue_id].mode = USER_MODE;
+    //         pcb[cur_queue_id].cursor_x = 0;
+    //         pcb[cur_queue_id].cursor_y = 0;
+    //         pcb[cur_queue_id].sleep_begin_time = 0;
+    //         pcb[cur_queue_id].sleep_end_time = 0;
+    //         pcb[cur_queue_id].count = 0;
+    //         // add to ready_queue
+    //         queue_push(&ready_queue, (void *)&pcb[cur_queue_id]);
+    //     }
+    // }
     // init current_running pointer to pcb[0]
     current_running = &pcb[0];
 }
@@ -204,7 +207,6 @@ void __attribute__((section(".entry_function"))) _start(void)
 
     while (1)
     {
-        // current_running->status = TASK_EXITED;
         do_scheduler();
     };
     return;

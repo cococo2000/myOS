@@ -87,19 +87,22 @@ static struct task_info *test_tasks[NUM_MAX_TASK] = {
 
 #endif
 
-static void disable_interrupt(){
+static void disable_interrupt()
+{
     uint32_t cp0_status = get_cp0_status();
     cp0_status &= 0xfffffffe;
     set_cp0_status(cp0_status);
 }
 
-static void enable_interrupt(){
+static void enable_interrupt()
+{
     uint32_t cp0_status = get_cp0_status();
     cp0_status |= 0x01;
     set_cp0_status(cp0_status);
 }
 
-static char read_uart_ch(void){
+static char read_uart_ch(void)
+{
     char ch = 0;
     char *read_port = (char *)0xffffffffbfe00000;
     volatile char *state = (char *)0xffffffffbfe00005;  // serial port state register
