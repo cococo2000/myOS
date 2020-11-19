@@ -116,17 +116,17 @@ void execute(uint32_t argc, char argv[][10])
 {
     if (argc == 1) {
         if (!strcmp(argv[0], "ps")) {
-            sys_ps();
+            sys_process_show();
         }
         else if (!strcmp(argv[0], "clear")){
-            sys_clear();
+            sys_screen_clear();
         }
         else {
             printf("Command '%s' not found,!\n", argv[0]);
         }
     }
     else if (argc == 2) {
-        int pid = itoa((char *)argv[1]);
+        int pid = argv[1][0] - '0';
         if (!strcmp(argv[0], "exec")) {
             printf("exec process[%d]\n", pid - 1);
             sys_spawn(test_tasks[pid - 1]);
@@ -134,9 +134,6 @@ void execute(uint32_t argc, char argv[][10])
         else if (!strcmp(argv[0], "kill")) {
             printf("kill process pid = %d\n", pid);
             sys_kill(pid);
-        }
-        else if (!strcmp(argv[0], "clear") && !strcmp(argv[1], "all")) {
-            sys_clear_all();
         }
         else {
             printf("Command '%s' not found,!\n", argv[0]);

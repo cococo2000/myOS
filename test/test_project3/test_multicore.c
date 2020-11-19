@@ -24,9 +24,9 @@ void test_multicore(void)
   sys_move_cursor(0, 0);
   printf("start test multi-core performance\n\r");
   int single_core_result = 0;
-  struct task_info task_add1 = {"add1", &add_task1, USER_PROCESS};
-  struct task_info task_add2 = {"add2", &add_task2, USER_PROCESS};
-  struct task_info task_add3 = {"add3", &add_task3, USER_PROCESS};
+  struct task_info task_add1 = {"add1", (uint64_t)&add_task1, USER_PROCESS};
+  struct task_info task_add2 = {"add2", (uint64_t)&add_task2, USER_PROCESS};
+  struct task_info task_add3 = {"add3", (uint64_t)&add_task3, USER_PROCESS};
   // single core performance
   int i;
   uint64_t singleCoreBegin = get_ticks();

@@ -26,7 +26,7 @@ bootblock: $(SRC_BOOT)
 
 main : $(SRC_ARCH) $(SRC_DRIVER) $(SRC_INIT) $(SRC_INT) $(SRC_LOCK) $(SRC_IPC) $(SRC_MM) $(SRC_SCHED) $(SRC_SYSCALL) $(SRC_LIBS) $(SRC_TEST) $(SRC_TEST2) $(SRC_TEST3)
 	${CC} -g -G 0 -O0 -I$(MAIN_DIR)/include    -I$(MAIN_DIR)/libs  -I$(MAIN_DIR)/fs -I$(MAIN_DIR)/arch/mips/include -I$(MAIN_DIR)/drivers -I$(MAIN_DIR)/include/os -I$(MAIN_DIR)/include/sys -I$(MAIN_DIR)/test  -I$(MAIN_DIR)/test/test_project3   \
-	-fno-pic -mno-abicalls -fno-builtin -nostdinc  -mabi=64  -mips64 -Ttext=0xffffffffa0800200 -N -o main \
+	-fno-pic -mno-abicalls -fno-builtin -nostdinc  -mabi=64  -mips64 -Ttext=0xffffffffa0800000 -N -o main \
 	$(SRC_TEST_FS) $(SRC_ARCH) $(SRC_FS) $(SRC_DRIVER) $(SRC_INIT) $(SRC_INT) $(SRC_IPC) $(SRC_SMP) $(SRC_LOCK)  $(SRC_MM) $(SRC_SCHED) $(SRC_SYSCALL) $(SRC_PROC) $(SRC_LIBS) $(SRC_TEST) $(SRC_TEST2) $(SRC_TEST3)  $(SRC_TEST4) -nostdlib -Wl,-m -Wl,elf64ltsmip -T  $(LD) 
 
 createimage: $(SRC_IMAGE)
@@ -41,7 +41,7 @@ clean:
 floppy:
 	# sudo fdisk -l /dev/sdb
 	# sudo dd if=image of=/dev/sdb conv=notrunc
-	sudo dd if=image of=disk conv=notrunc
+	# sudo dd if=image of=disk conv=notrunc
 
 asm:
 	mips64el-linux-objdump -d main > kernel.txt
