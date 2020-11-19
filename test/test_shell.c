@@ -126,10 +126,10 @@ void execute(uint32_t argc, char argv[][10])
         }
     }
     else if (argc == 2) {
-        int pid = argv[1][0] - '0';// TODO:
+        int pid = argv[1][0] - '0';
         if (!strcmp(argv[0], "exec")) {
             printf("exec process[%d].\n", pid);
-            sys_spawn(&test_tasks[pid]);
+            sys_spawn(test_tasks[pid]);
         }
         else if (!strcmp(argv[0], "kill")) {
             printf("kill process pid = %d.\n", pid);
@@ -162,7 +162,7 @@ void test_shell()
         if (ch == 0 || (i == 0 && (ch == 0x8 || ch == 0x7f))) {
             continue;
         }
-        // delete TODO:
+        // delete or backspace
         else if (i && (ch == 0x8 || ch == 0x7f)) {
             i--;
             screen_cursor_x --;

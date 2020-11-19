@@ -87,7 +87,7 @@ void scheduler(void)
         current_running->cursor_y = screen_cursor_y;
 
         check_sleeping();
-        if(current_running->status != TASK_BLOCKED){
+        if(current_running->status != TASK_BLOCKED && current_running->status != TASK_EXITED){
             current_running->status = TASK_READY;
             if(current_running->pid != 0){
                 queue_push(&ready_queue, current_running);
@@ -187,6 +187,7 @@ void do_exit(void)
         do_unblock_all(&lock->queue);
         lock->status = UNLOCKED;
     }
+
     do_scheduler();
 }
 
@@ -213,18 +214,18 @@ int do_waitpid(pid_t pid)
 // process show
 void do_process_show()
 {
-    printk("[PROCESS TABLE]\n");
+    kprintf("[PROCESS TABLE]\n");
     int num, items = 0;
     for (num = 0; num < NUM_MAX_TASK; num++) {
         switch(pcb[num].status) {
             case TASK_BLOCKED:
-                printk("[%d] PID : %d  Status : BLOCKED\n", items++, pcb[num].pid);
+                kprintf("[%d] PID : %d  Status : BLOCKED\n", items++, pcb[num].pid);
                 break;
             case TASK_RUNNING:
-                printk("[%d] PID : %d  Status : RUNNING\n", items++, pcb[num].pid);
+                kprintf("[%d] PID : %d  Status : RUNNING\n", items++, pcb[num].pid);
                 break;
             case TASK_READY:
-                printk("[%d] PID : %d  Status : READY\n", items++, pcb[num].pid);
+                kprintf("[%d] PID : %d  Status : READY\n", items++, pcb[num].pid);
                 break;
             default:
                 break;
@@ -239,6 +240,6 @@ pid_t do_getpid()
 
 void do_clear()
 {
-    screen_clear(SCREEN_HEIGHT / 2 + 1, SCREEN_HEIGHT);
+    screen_clear(0, SCREEN_HEIGHT / 2 - 1);
     screen_move_cursor(0, SCREEN_HEIGHT / 2 + 1);
 }

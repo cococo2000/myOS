@@ -210,8 +210,3 @@ void sys_net_send(uint64_t td, uint64_t td_phy)
 void sys_init_mac()
 {
 }
-
-void sys_other()
-{
-    return;
-}

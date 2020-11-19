@@ -144,10 +144,6 @@ static void init_exception()
 static void init_syscall(void)
 {
     // init system call table
-    int i;
-    for (i = 0; i < NUM_SYSCALLS; i++) {
-        syscall[i] = (uint64_t (*)())&sys_other;
-    }
     syscall[SYSCALL_SPAWN              ] = (uint64_t (*)())do_spawn;
     syscall[SYSCALL_EXIT               ] = (uint64_t (*)())do_exit;
     syscall[SYSCALL_SLEEP              ] = (uint64_t (*)())do_sleep;
