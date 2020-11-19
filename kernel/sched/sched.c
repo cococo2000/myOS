@@ -4,6 +4,7 @@
 #include "sched.h"
 #include "queue.h"
 #include "screen.h"
+#include "irq.h"
 
 pcb_t pcb[NUM_MAX_TASK];
 
@@ -155,7 +156,38 @@ void do_unblock_all(queue_t *queue)
 
 int do_spawn(task_info_t *task)
 {
-     
+    //  init pcb all 0
+    bzero(&pcb[process_id], sizeof(pcb_t));
+    // init kernel_context and stack
+    pcb[process_id].kernel_stack_top = stack_top;
+    pcb[process_id].kernel_context.regs[29] = stack_top;
+    stack_top -= PCB_STACK_SIZE;
+    pcb[process_id].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
+    pcb[process_id].kernel_context.cp0_status = initial_cp0_status;
+    pcb[process_id].kernel_context.cp0_epc = task->entry_point;
+    // init user_context and stack
+    pcb[process_id].user_stack_top = stack_top;
+    pcb[process_id].user_context.regs[29] = stack_top;
+    stack_top -= PCB_STACK_SIZE;
+    pcb[process_id].user_context.regs[31] = task->entry_point;
+    pcb[process_id].user_context.cp0_status = initial_cp0_status;
+    pcb[process_id].user_context.cp0_epc = task->entry_point;
+    // init other data
+    pcb[process_id].prev = NULL;
+    pcb[process_id].next = NULL;
+    strcpy(pcb[process_id].name, task->name);
+    pcb[process_id].pid = process_id;
+    pcb[process_id].type = task->type;
+    pcb[process_id].status = TASK_READY;
+    pcb[process_id].mode = USER_MODE;
+    pcb[process_id].cursor_x = 0;
+    pcb[process_id].cursor_y = 0;
+    pcb[process_id].sleep_begin_time = 0;
+    pcb[process_id].sleep_end_time = 0;
+    pcb[process_id].count = 0;
+    // add to ready_queue
+    queue_push(&ready_queue, (void *)&pcb[process_id]);
+    process_id++;
 }
 
 int do_kill(pid_t pid)
@@ -177,5 +209,11 @@ void do_process_show()
 
 pid_t do_getpid()
 {
-     
+    return current_running->pid;
+}
+
+void do_clear()
+{
+    screen_clear(SCREEN_HEIGHT / 2 + 1, SCREEN_HEIGHT);
+    screen_move_cursor(0, SCREEN_HEIGHT / 2 + 1);
 }

@@ -45,7 +45,7 @@ void ready_to_exit_task()
     {
         sys_move_cursor(0, print_location);
         uint32_t core_id = get_cpu_id();
-        printf("> [TASK] I am task with pid %d, I have acquired two mutex lock. (%d)", current_running[core_id]->pid, i++);
+        printf("> [TASK] I am task with pid %d, I have acquired two mutex lock. (%d)", current_running[core_id].pid, i++);
     }
     sys_exit(); // test exit
 }

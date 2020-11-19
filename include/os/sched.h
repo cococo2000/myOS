@@ -31,9 +31,16 @@
 
 #include "type.h"
 #include "queue.h"
+#include "lock.h"
 
 #define NUM_MAX_TASK 32
 #define CORE_NUM 2
+#define NUM_LOCK 4
+#define STACK_MAX 0xffffffffa0f00000
+#define STACK_MIN 0xffffffffa0d00000
+#define PCB_STACK_SIZE 0x10000
+
+uint64_t stack_top = STACK_MAX;
 /* used to save register infomation */
 typedef struct regs_context
 {
@@ -81,9 +88,6 @@ typedef struct pcb
     uint64_t kernel_stack_top;
     uint64_t user_stack_top;
 
-    // store the last do_scheduler time
-    // uint64_t do_scheduler_cost;
-
     /* previous, next pointer */
     struct pcb * prev;
     struct pcb * next;
@@ -99,10 +103,10 @@ typedef struct pcb
     /* What tasks are blocked by me, the tasks in this 
      * queue need to be unblocked when I do_exit(). */
 
-    /* holding lock */
-
     /* block related */
-
+    queue_t wait_queue;
+    /* holding lock */
+    mutex_lock_t * lock[NUM_LOCK];
     /* kernel/user thread/process */
     task_type_t type;
     /* BLOCK | READY | RUNNING */
@@ -160,4 +164,6 @@ void set_pcb(pid_t, pcb_t *, task_info_t *);
 void do_process_show();
 pid_t do_getpid();
 uint64_t get_cpu_id();
+
+void do_clear();
 #endif

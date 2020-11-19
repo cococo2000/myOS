@@ -144,4 +144,5 @@ int sys_cat(char *);
 uint32_t sys_get_timer();
 void sys_yield();
 
+void sys_other();
 #endif
