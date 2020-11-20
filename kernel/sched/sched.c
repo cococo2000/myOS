@@ -241,5 +241,6 @@ pid_t do_getpid()
 void do_clear()
 {
     screen_clear(0, SCREEN_HEIGHT / 2 - 1);
+    screen_clear(SCREEN_HEIGHT / 2 + 1, SCREEN_HEIGHT);
     screen_move_cursor(0, SCREEN_HEIGHT / 2 + 1);
 }
