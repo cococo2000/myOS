@@ -48,20 +48,16 @@ static void init_memory()
 }
 
 static void init_pcb0(){
-    pcb[0].kernel_stack_top = stack_top;
-    pcb[0].kernel_context.regs[29] = stack_top;
+    pcb[0].kernel_context.regs[29] = pcb[0].kernel_stack_top;
     pcb[0].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
     pcb[0].kernel_context.cp0_status = initial_cp0_status;
-    stack_top -= PCB_STACK_SIZE;
-    pcb[0].user_stack_top = stack_top;
-    pcb[0].user_context.regs[29] = stack_top;
+    pcb[0].user_context.regs[29] = pcb[0].user_stack_top;
     pcb[0].user_context.cp0_status = initial_cp0_status;
-    stack_top -= PCB_STACK_SIZE;
     pcb[0].base_priority = 1;
     pcb[0].priority = 1;
     strcpy(pcb[0].name, "task0 ");
     pcb[0].pid = 0;
-    pcb[0].which_queue = &ready_queue;
+    // pcb[0].which_queue = &ready_queue;
     queue_init(&pcb[0].wait_queue);
     queue_init(&pcb[0].lock_queue);
     pcb[0].type = KERNEL_PROCESS;
@@ -80,6 +76,8 @@ static void init_pcb()
     for (i = 0; i < NUM_MAX_TASK; i++) {
         bzero(&pcb[i], sizeof(pcb_t));
         pcb[i].status = TASK_EXITED;
+        pcb[i].kernel_stack_top = new_kernel_stack();
+        pcb[i].user_stack_top = new_user_stack();
     }
     queue_init(&ready_queue);
     queue_init(&block_queue);
@@ -166,13 +164,11 @@ void __attribute__((section(".entry_function"))) _start(void)
     asm_start();
 
     /* init Process Control Block */
-    init_pcb();
-    // current_running->mode = KERNEL_MODE;
-    printk("> [INIT] PCB initialization succeeded.\n");
-
     /* init stack space */
     init_stack();
+    init_pcb();
     printk("> [INIT] Stack heap initialization succeeded.\n");
+    printk("> [INIT] PCB initialization succeeded.\n");
 
     /* init interrupt */
     init_exception();

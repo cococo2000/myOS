@@ -15,27 +15,35 @@ pcb_t *current_running;
 pid_t process_id = 1;
 
 /* kernel stack ^_^ */
-#define NUM_KERNEL_STACK 20
+#define NUM_KERNEL_STACK 0x20
 
 static uint64_t kernel_stack[NUM_KERNEL_STACK];
-static int kernel_stack_count;
+static int kernel_stack_count = 0;
 
 static uint64_t user_stack[NUM_KERNEL_STACK];
-static int user_stack_count;
+static int user_stack_count = 0;
 
 void init_stack()
 {
-    
+    uint64_t kernel_stack_top = STACK_MAX;
+    uint64_t user_stack_top = STACK_MIN;
+    int i;
+    for (i = 0; i < NUM_KERNEL_STACK; i++) {
+        kernel_stack[i] = kernel_stack_top - i * STACK_SIZE;
+    }
+    for (i = 0; i < NUM_KERNEL_STACK; i++) {
+        user_stack[i] = user_stack_top + i * STACK_SIZE;
+    }
 }
 
 uint64_t new_kernel_stack()
 {
-     
+    return kernel_stack[kernel_stack_count++];
 }
 
 uint64_t new_user_stack()
 {
-    
+    return user_stack[user_stack_count++];
 }
 
 static void free_kernel_stack(uint64_t stack_addr)
@@ -51,27 +59,21 @@ static void free_user_stack(uint64_t stack_addr)
 /* Process Control Block */
 void set_pcb(pid_t pid, pcb_t *pcb, task_info_t *task_info)
 {
-    //  init pcb all 0
-    bzero(pcb, sizeof(pcb_t));
     // init kernel_context and stack
-    pcb->kernel_stack_top = stack_top;
-    pcb->kernel_context.regs[29] = stack_top;
+    pcb->kernel_context.regs[29] = pcb->kernel_stack_top;
     pcb->kernel_context.regs[31] = (uint64_t)exception_handler_exit;
     pcb->kernel_context.cp0_status = initial_cp0_status;
     pcb->kernel_context.cp0_epc = task_info->entry_point;
-    stack_top -= PCB_STACK_SIZE;
     // init user_context and stack
-    pcb->user_stack_top = stack_top;
-    pcb->user_context.regs[29] = stack_top;
+    pcb->user_context.regs[29] = pcb->user_stack_top;
     pcb->user_context.regs[31] = task_info->entry_point;
     pcb->user_context.cp0_status = initial_cp0_status;
     pcb->user_context.cp0_epc = task_info->entry_point;
-    stack_top -= PCB_STACK_SIZE;
     // init other data
     pcb->base_priority = 1;
     pcb->priority = 1;
     strcpy(pcb->name, task_info->name);
-    pcb->pid = process_id;
+    pcb->pid = pid;
     pcb->which_queue = &ready_queue;
     pcb->type = task_info->type;
     pcb->status = TASK_READY;
