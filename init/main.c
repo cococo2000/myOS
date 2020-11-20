@@ -110,6 +110,7 @@ static void init_exception()
     /* fill nop */
     memcpy(0xffffffff80000180, exception_handler_entry, (char *)exception_handler_end - (char *)exception_handler_begin);
     set_cp0_cause(0x00000000);
+    set_cp0_status(initial_cp0_status);
     /* set COUNT & set COMPARE */
     /* open interrupt */
     set_cp0_count(0x00000000);

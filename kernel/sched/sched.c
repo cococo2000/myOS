@@ -70,7 +70,7 @@ void set_pcb(pid_t pid, pcb_t *pcb, task_info_t *task_info)
     // init other data
     pcb->base_priority = 1;
     pcb->priority = 1;
-    strcpy(pcb[process_id].name, task_info->name);
+    strcpy(pcb->name, task_info->name);
     pcb->pid = process_id;
     pcb->which_queue = &ready_queue;
     pcb->type = task_info->type;
@@ -175,9 +175,10 @@ int do_spawn(task_info_t *task)
     while (i < NUM_MAX_TASK && pcb[i].status != TASK_EXITED) {
         i++;
     }
-    set_pcb(process_id++, &pcb[i], task);
+    set_pcb(process_id, &pcb[i], task);
     // add to ready_queue
     queue_push(&ready_queue, (void *)&pcb[i]);
+    process_id++;
 }
 
 void do_exit(void)
@@ -222,13 +223,13 @@ void do_process_show()
     for (num = 0; num < NUM_MAX_TASK; num++) {
         switch(pcb[num].status) {
             case TASK_BLOCKED:
-                kprintf("[%d] PID : %d\t %s\t Status : BLOCKED\n", items++, pcb[num].name, pcb[num].pid);
+                kprintf("[%d] PID : %d\t %s\t\t Status : BLOCKED\n", items++, pcb[num].pid, pcb[num].name);
                 break;
             case TASK_RUNNING:
-                kprintf("[%d] PID : %d\t %s\t Status : RUNNING\n", items++, pcb[num].name, pcb[num].pid);
+                kprintf("[%d] PID : %d\t %s\t\t Status : RUNNING\n", items++, pcb[num].pid, pcb[num].name);
                 break;
             case TASK_READY:
-                kprintf("[%d] PID : %d\t %s\t Status : READY\n", items++, pcb[num].name, pcb[num].pid);
+                kprintf("[%d] PID : %d\t %s\t\t Status : READY\n", items++, pcb[num].pid, pcb[num].name);
                 break;
             default:
                 break;
