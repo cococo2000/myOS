@@ -47,16 +47,7 @@ static void init_memory()
 {
 }
 
-static void init_pcb()
-{
-    int i;
-    for (i = 0; i < NUM_MAX_TASK; i++) {
-        bzero(&pcb[i], sizeof(pcb_t));
-        pcb[i].status = TASK_EXITED;
-    }
-    queue_init(&ready_queue);
-    queue_init(&block_queue);
-    // pcb[0] init
+static void init_pcb0(){
     pcb[0].kernel_stack_top = stack_top;
     pcb[0].kernel_context.regs[29] = stack_top;
     pcb[0].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
@@ -81,6 +72,19 @@ static void init_pcb()
     pcb[0].sleep_begin_time = 0;
     pcb[0].sleep_end_time = 0;
     pcb[0].count = 0;
+}
+
+static void init_pcb()
+{
+    int i;
+    for (i = 0; i < NUM_MAX_TASK; i++) {
+        bzero(&pcb[i], sizeof(pcb_t));
+        pcb[i].status = TASK_EXITED;
+    }
+    queue_init(&ready_queue);
+    queue_init(&block_queue);
+    // pcb[0] init, pcb = 0
+    init_pcb0();
     // shell init
     int shell_pid = 1;  // = (init) process_id
     do_spawn(&shell_task);

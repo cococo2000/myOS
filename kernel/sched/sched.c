@@ -222,13 +222,13 @@ void do_process_show()
     for (num = 0; num < NUM_MAX_TASK; num++) {
         switch(pcb[num].status) {
             case TASK_BLOCKED:
-                kprintf("[%d] PID : %d  Status : BLOCKED\n", items++, pcb[num].pid);
+                kprintf("[%d] PID : %d\t %s\t Status : BLOCKED\n", items++, pcb[num].name, pcb[num].pid);
                 break;
             case TASK_RUNNING:
-                kprintf("[%d] PID : %d  Status : RUNNING\n", items++, pcb[num].pid);
+                kprintf("[%d] PID : %d\t %s\t Status : RUNNING\n", items++, pcb[num].name, pcb[num].pid);
                 break;
             case TASK_READY:
-                kprintf("[%d] PID : %d  Status : READY\n", items++, pcb[num].pid);
+                kprintf("[%d] PID : %d\t %s\t Status : READY\n", items++, pcb[num].name, pcb[num].pid);
                 break;
             default:
                 break;
