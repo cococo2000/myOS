@@ -83,33 +83,7 @@ static void init_pcb()
     pcb[0].count = 0;
     // shell init
     int shell_pid = 1;  // = (init) process_id
-    pcb[shell_pid].kernel_stack_top = stack_top;
-    pcb[shell_pid].kernel_context.regs[29] = stack_top;
-    pcb[shell_pid].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
-    pcb[shell_pid].kernel_context.cp0_epc  = (uint64_t)&test_shell;
-    pcb[shell_pid].kernel_context.cp0_status = initial_cp0_status;
-    stack_top -= PCB_STACK_SIZE;
-    pcb[shell_pid].user_stack_top = stack_top;
-    pcb[shell_pid].user_context.regs[29] = stack_top;
-    pcb[shell_pid].user_context.regs[31] = (uint64_t)&test_shell;
-    pcb[shell_pid].user_context.cp0_epc  = (uint64_t)&test_shell;
-    pcb[shell_pid].user_context.cp0_status = initial_cp0_status;
-    stack_top -= PCB_STACK_SIZE;
-    pcb[shell_pid].base_priority = 1;
-    pcb[shell_pid].priority = 1;
-    strcpy(pcb[shell_pid].name, "shell ");
-    pcb[shell_pid].pid = process_id++;
-    pcb[shell_pid].which_queue = &ready_queue;
-    queue_init(&pcb[shell_pid].wait_queue);
-    queue_init(&pcb[shell_pid].lock_queue);
-    pcb[shell_pid].type = USER_PROCESS;
-    pcb[shell_pid].status = TASK_READY;
-    pcb[shell_pid].mode = USER_MODE;
-    pcb[shell_pid].cursor_x = 0;
-    pcb[shell_pid].cursor_y = 0;
-    pcb[shell_pid].sleep_begin_time = 0;
-    pcb[shell_pid].sleep_end_time = 0;
-    pcb[shell_pid].count = 0;
+    do_spawn(&shell_task);
     queue_push(&ready_queue, (void *)&pcb[shell_pid]);
     // init current_running pointer to pcb[0]
     current_running = &pcb[0];
