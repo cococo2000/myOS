@@ -54,13 +54,9 @@ static void init_pcb()
         bzero(&pcb[i], sizeof(pcb_t));
         pcb[i].status = TASK_EXITED;
     }
-     // int num_total_tasks_groups = 3;
-    // int each_tasks_num[4] = {num_lock_tasks, num_timer_tasks, num_sched2_tasks};
-    // struct task_info ** p_task_info[4] = {lock_tasks, timer_tasks, sched2_tasks};
     queue_init(&ready_queue);
     queue_init(&block_queue);
     // pcb[0] init
-    // bzero(&pcb[0], sizeof(pcb_t));
     pcb[0].kernel_stack_top = stack_top;
     pcb[0].kernel_context.regs[29] = stack_top;
     pcb[0].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
@@ -87,7 +83,6 @@ static void init_pcb()
     pcb[0].count = 0;
     // shell init
     int shell_pid = 1;  // = (init) process_id
-    // bzero(&pcb[shell_pid], sizeof(pcb_t));
     pcb[shell_pid].kernel_stack_top = stack_top;
     pcb[shell_pid].kernel_context.regs[29] = stack_top;
     pcb[shell_pid].kernel_context.regs[31] = (uint64_t)exception_handler_exit;

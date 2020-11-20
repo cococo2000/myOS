@@ -153,7 +153,7 @@ void test_shell()
     uint32_t j, k;
     sys_move_cursor(0, SCREEN_HEIGHT / 2);
     printf("-------------------------    COMMAND    --------------------------\n");
-    printf("> root@UCAS_OS:");
+    printf("> root@UCAS_OS: ");
     while (1) {
         disable_interrupt();
         char ch = read_uart_ch();

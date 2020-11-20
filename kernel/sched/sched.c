@@ -142,36 +142,40 @@ void do_unblock_all(queue_t *queue)
 
 int do_spawn(task_info_t *task)
 {
+    int i = 0;
+    while (i < NUM_MAX_TASK && pcb[i].status != TASK_EXITED) {
+        i++;
+    }
     //  init pcb all 0
-    bzero(&pcb[process_id], sizeof(pcb_t));
+    bzero(&pcb[i], sizeof(pcb_t));
     // init kernel_context and stack
-    pcb[process_id].kernel_stack_top = stack_top;
-    pcb[process_id].kernel_context.regs[29] = stack_top;
-    pcb[process_id].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
-    pcb[process_id].kernel_context.cp0_status = initial_cp0_status;
-    pcb[process_id].kernel_context.cp0_epc = task->entry_point;
+    pcb[i].kernel_stack_top = stack_top;
+    pcb[i].kernel_context.regs[29] = stack_top;
+    pcb[i].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
+    pcb[i].kernel_context.cp0_status = initial_cp0_status;
+    pcb[i].kernel_context.cp0_epc = task->entry_point;
     stack_top -= PCB_STACK_SIZE;
     // init user_context and stack
-    pcb[process_id].user_stack_top = stack_top;
-    pcb[process_id].user_context.regs[29] = stack_top;
-    pcb[process_id].user_context.regs[31] = task->entry_point;
-    pcb[process_id].user_context.cp0_status = initial_cp0_status;
-    pcb[process_id].user_context.cp0_epc = task->entry_point;
+    pcb[i].user_stack_top = stack_top;
+    pcb[i].user_context.regs[29] = stack_top;
+    pcb[i].user_context.regs[31] = task->entry_point;
+    pcb[i].user_context.cp0_status = initial_cp0_status;
+    pcb[i].user_context.cp0_epc = task->entry_point;
     stack_top -= PCB_STACK_SIZE;
     // init other data
-    pcb[process_id].base_priority = 1;
-    pcb[process_id].priority = 1;
+    pcb[i].base_priority = 1;
+    pcb[i].priority = 1;
     strcpy(pcb[process_id].name, task->name);
-    pcb[process_id].pid = process_id;
-    pcb[process_id].which_queue = &ready_queue;
-    pcb[process_id].type = task->type;
-    pcb[process_id].status = TASK_READY;
-    pcb[process_id].mode = USER_MODE;
-    pcb[process_id].cursor_x = 0;
-    pcb[process_id].cursor_y = 0;
-    pcb[process_id].sleep_begin_time = 0;
-    pcb[process_id].sleep_end_time = 0;
-    pcb[process_id].count = 0;
+    pcb[i].pid = process_id;
+    pcb[i].which_queue = &ready_queue;
+    pcb[i].type = task->type;
+    pcb[i].status = TASK_READY;
+    pcb[i].mode = USER_MODE;
+    pcb[i].cursor_x = 0;
+    pcb[i].cursor_y = 0;
+    pcb[i].sleep_begin_time = 0;
+    pcb[i].sleep_end_time = 0;
+    pcb[i].count = 0;
     // add to ready_queue
     queue_push(&ready_queue, (void *)&pcb[process_id]);
     process_id++;
