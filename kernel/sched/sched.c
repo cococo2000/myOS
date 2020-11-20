@@ -51,7 +51,36 @@ static void free_user_stack(uint64_t stack_addr)
 /* Process Control Block */
 void set_pcb(pid_t pid, pcb_t *pcb, task_info_t *task_info)
 {
-    
+    //  init pcb all 0
+    bzero(pcb, sizeof(pcb_t));
+    // init kernel_context and stack
+    pcb->kernel_stack_top = stack_top;
+    pcb->kernel_context.regs[29] = stack_top;
+    pcb->kernel_context.regs[31] = (uint64_t)exception_handler_exit;
+    pcb->kernel_context.cp0_status = initial_cp0_status;
+    pcb->kernel_context.cp0_epc = task_info->entry_point;
+    stack_top -= PCB_STACK_SIZE;
+    // init user_context and stack
+    pcb->user_stack_top = stack_top;
+    pcb->user_context.regs[29] = stack_top;
+    pcb->user_context.regs[31] = task_info->entry_point;
+    pcb->user_context.cp0_status = initial_cp0_status;
+    pcb->user_context.cp0_epc = task_info->entry_point;
+    stack_top -= PCB_STACK_SIZE;
+    // init other data
+    pcb->base_priority = 1;
+    pcb->priority = 1;
+    strcpy(pcb[process_id].name, task_info->name);
+    pcb->pid = process_id;
+    pcb->which_queue = &ready_queue;
+    pcb->type = task_info->type;
+    pcb->status = TASK_READY;
+    pcb->mode = USER_MODE;
+    pcb->cursor_x = 0;
+    pcb->cursor_y = 0;
+    pcb->sleep_begin_time = 0;
+    pcb->sleep_end_time = 0;
+    pcb->count = 0;
 }
 
 /* ready queue to run */
@@ -146,39 +175,9 @@ int do_spawn(task_info_t *task)
     while (i < NUM_MAX_TASK && pcb[i].status != TASK_EXITED) {
         i++;
     }
-    //  init pcb all 0
-    bzero(&pcb[i], sizeof(pcb_t));
-    // init kernel_context and stack
-    pcb[i].kernel_stack_top = stack_top;
-    pcb[i].kernel_context.regs[29] = stack_top;
-    pcb[i].kernel_context.regs[31] = (uint64_t)exception_handler_exit;
-    pcb[i].kernel_context.cp0_status = initial_cp0_status;
-    pcb[i].kernel_context.cp0_epc = task->entry_point;
-    stack_top -= PCB_STACK_SIZE;
-    // init user_context and stack
-    pcb[i].user_stack_top = stack_top;
-    pcb[i].user_context.regs[29] = stack_top;
-    pcb[i].user_context.regs[31] = task->entry_point;
-    pcb[i].user_context.cp0_status = initial_cp0_status;
-    pcb[i].user_context.cp0_epc = task->entry_point;
-    stack_top -= PCB_STACK_SIZE;
-    // init other data
-    pcb[i].base_priority = 1;
-    pcb[i].priority = 1;
-    strcpy(pcb[process_id].name, task->name);
-    pcb[i].pid = process_id;
-    pcb[i].which_queue = &ready_queue;
-    pcb[i].type = task->type;
-    pcb[i].status = TASK_READY;
-    pcb[i].mode = USER_MODE;
-    pcb[i].cursor_x = 0;
-    pcb[i].cursor_y = 0;
-    pcb[i].sleep_begin_time = 0;
-    pcb[i].sleep_end_time = 0;
-    pcb[i].count = 0;
+    set_pcb(process_id++, &pcb[i], task);
     // add to ready_queue
-    queue_push(&ready_queue, (void *)&pcb[process_id]);
-    process_id++;
+    queue_push(&ready_queue, (void *)&pcb[i]);
 }
 
 void do_exit(void)
