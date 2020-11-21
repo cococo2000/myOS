@@ -87,31 +87,6 @@ static struct task_info *test_tasks[NUM_MAX_TASK] = {
 
 #endif
 
-// static void disable_interrupt()
-// {
-//     uint32_t cp0_status = get_cp0_status();
-//     cp0_status &= 0xfffffffe;
-//     set_cp0_status(cp0_status);
-// }
-
-// static void enable_interrupt()
-// {
-//     uint32_t cp0_status = get_cp0_status();
-//     cp0_status |= 0x01;
-//     set_cp0_status(cp0_status);
-// }
-
-// static char read_uart_ch(void)
-// {
-//     char ch = 0;
-//     char *read_port = (char *)0xffffffffbfe00000;
-//     volatile char *state = (char *)0xffffffffbfe00005;  // serial port state register
-//     while ((*state) & 0x01) {
-//         ch = *read_port;
-//     }
-//     return ch;
-// }
-
 char read_shell_buff()
 {
     char ch = 0;
@@ -177,10 +152,7 @@ void test_shell()
     printf("-------------------------    COMMAND    --------------------------\n");
     printf("> root@UCAS_OS: ");
     while (1) {
-        // disable_interrupt();
-        // char ch = read_uart_ch();
         char ch = sys_read_shell_buff();
-        // enable_interrupt();
         // NULL or (BackSpace or Delete) at begin
         if (ch == 0 || (i == 0 && (ch == 0x8 || ch == 0x7f))) {
             continue;
