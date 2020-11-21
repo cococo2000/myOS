@@ -112,6 +112,17 @@ static char read_uart_ch(void)
     return ch;
 }
 
+int my_atoi(char s[])
+{
+    int i = 0;
+    int value = 0;
+    while (s[i] >= '0' && s[i] <= '9') {
+        value = value * 10 + (s[i] - '0');
+        i++;
+    }
+    return value;
+}
+
 void execute(uint32_t argc, char argv[][10])
 {
     if (argc == 1) {
@@ -126,7 +137,7 @@ void execute(uint32_t argc, char argv[][10])
         }
     }
     else if (argc == 2) {
-        int pid = argv[1][0] - '0';
+        int pid = my_atoi(argv[1]);
         if (!strcmp(argv[0], "exec")) {
             printf("exec process[%d].\n", pid);
             sys_spawn(test_tasks[pid]);
