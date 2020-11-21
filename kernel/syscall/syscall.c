@@ -34,12 +34,12 @@ void sys_sleep(uint32_t time)
 
 int sys_kill(pid_t pid)
 {
-    invoke_syscall(SYSCALL_KILL, (uint64_t)pid, IGNORE, IGNORE);
+    return invoke_syscall(SYSCALL_KILL, (uint64_t)pid, IGNORE, IGNORE);
 }
 
 int sys_waitpid(pid_t pid)
 {
-    invoke_syscall(SYSCALL_WAITPID, (uint64_t)pid, IGNORE, IGNORE);
+    return invoke_syscall(SYSCALL_WAITPID, (uint64_t)pid, IGNORE, IGNORE);
 }
 
 void sys_process_show(void)

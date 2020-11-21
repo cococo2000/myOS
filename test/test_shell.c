@@ -129,8 +129,9 @@ void execute(uint32_t argc, char argv[][10])
             sys_spawn(test_tasks[pid]);
         }
         else if (!strcmp(argv[0], "kill")) {
-            printf("kill process pid = %d.\n", pid);
-            sys_kill(pid);
+            if (!sys_kill(pid)) {
+                printf("kill process pid = %d.\n", pid);
+            }
         }
         else {
             printf("Command '%s' not found!\n", argv[0]);
