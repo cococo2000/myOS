@@ -55,7 +55,7 @@ static void init_pcb0(){
     pcb[0].user_context.cp0_status = initial_cp0_status;
     pcb[0].base_priority = 1;
     pcb[0].priority = 1;
-    strcpy(pcb[0].name, "task0 ");
+    strcpy(pcb[0].name, "task0");
     pcb[0].pid = 0;
     // pcb[0].which_queue = &ready_queue;
     queue_init(&pcb[0].wait_queue);

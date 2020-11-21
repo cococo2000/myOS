@@ -222,16 +222,26 @@ void do_process_show()
 {
     kprintf("[PROCESS TABLE]\n");
     int num, items = 0;
+    char blank[] = {"                                                               "};
     for (num = 0; num < NUM_MAX_TASK; num++) {
         switch(pcb[num].status) {
             case TASK_BLOCKED:
-                kprintf("[%d] PID : %d\t %s\t\t Status : BLOCKED\n", items++, pcb[num].pid, pcb[num].name);
+                kprintf("%s", blank);
+                screen_cursor_x = 0;
+                vt100_move_cursor(screen_cursor_x, screen_cursor_y);
+                kprintf("[%d] PID: %d Name: %s Status : BLOCKED\n", items++, pcb[num].pid, pcb[num].name);
                 break;
             case TASK_RUNNING:
-                kprintf("[%d] PID : %d\t %s\t\t Status : RUNNING\n", items++, pcb[num].pid, pcb[num].name);
+                kprintf("%s", blank);
+                screen_cursor_x = 0;
+                vt100_move_cursor(screen_cursor_x, screen_cursor_y);
+                kprintf("[%d] PID: %d Name: %s Status : RUNNING\n", items++, pcb[num].pid, pcb[num].name);
                 break;
             case TASK_READY:
-                kprintf("[%d] PID : %d\t %s\t\t Status : READY\n", items++, pcb[num].pid, pcb[num].name);
+                kprintf("%s", blank);
+                screen_cursor_x = 0;
+                vt100_move_cursor(screen_cursor_x, screen_cursor_y);
+                kprintf("[%d] PID: %d Name: %s Status : READY\n", items++, pcb[num].pid, pcb[num].name);
                 break;
             default:
                 break;

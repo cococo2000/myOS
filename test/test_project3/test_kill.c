@@ -57,12 +57,12 @@ void wait_lock_task()
     int i, print_location = 1;
 
     sys_move_cursor(0, print_location);
-    printf("> [TASK] I want to acquire a mute lock from task(pid=2).");
+    printf("> [TASK] I want to acquire a mute lock from task(pid=2).    ");
 
     mutex_lock_acquire(&lock1);
 
     sys_move_cursor(0, print_location);
-    printf("> [TASK] I have acquired a mutex lock from task(pid=2).");
+    printf("> [TASK] I have acquired a mutex lock from task(pid=2).     ");
 
     sys_exit(); // test exit
 }
@@ -73,7 +73,7 @@ void wait_exit_task()
     int i, print_location = 2;
 
     sys_move_cursor(0, print_location);
-    printf("> [TASK] I want to wait task (pid=2) to exit.");
+    printf("> [TASK] I want to wait task (pid=2) to exit.    ");
 
     sys_waitpid(2); //test waitpid
 
