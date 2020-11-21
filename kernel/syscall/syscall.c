@@ -49,7 +49,7 @@ void sys_process_show(void)
 
 pid_t sys_getpid()
 {
-    invoke_syscall(SYSCALL_GETPID, IGNORE, IGNORE, IGNORE);
+    return invoke_syscall(SYSCALL_GETPID, IGNORE, IGNORE, IGNORE);
 }
 
 
@@ -146,10 +146,13 @@ void barrier_wait(barrier_t *barrier)
 }
 
 
-int sys_read_shell_buff(char *buff)
+// int sys_read_shell_buff(char *buff)
+// {
+// }
+char sys_read_shell_buff()
 {
+    return invoke_syscall(SYSCALL_READ_SHELL_BUFF, IGNORE, IGNORE, IGNORE);
 }
-
 
 void sys_mkfs()
 {

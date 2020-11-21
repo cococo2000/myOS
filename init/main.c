@@ -117,6 +117,7 @@ static void init_exception()
 
 // [2]
 // extern int read_shell_buff(char *buff);
+extern char read_shell_buff();
 
 static void init_syscall(void)
 {
@@ -138,7 +139,7 @@ static void init_syscall(void)
     syscall[SYSCALL_REFLUSH            ] = (uint64_t (*)())screen_reflush;
     // syscall[SYSCALL_SERIAL_READ        ] = (uint64_t (*)())NULL;
     // syscall[SYSCALL_SERIAL_WRITE       ] = (uint64_t (*)())NULL;
-    // syscall[SYSCALL_READ_SHELL_BUFF    ] = (uint64_t (*)())NULL;
+    syscall[SYSCALL_READ_SHELL_BUFF    ] = (uint64_t (*)())read_shell_buff;
     syscall[SYSCALL_SCREEN_CLEAR       ] = (uint64_t (*)())do_clear;
 
     syscall[SYSCALL_MUTEX_LOCK_INIT    ] = (uint64_t (*)())do_mutex_lock_init;
