@@ -156,8 +156,10 @@ void scheduler(void)
 
 void do_block(queue_t *queue)
 {
-    current_running->status = TASK_BLOCKED;
-    queue_push(queue, (void*)current_running);
+    if (current_running->status != TASK_EXITED) {
+        current_running->status = TASK_BLOCKED;
+        queue_push(queue, (void*)current_running);
+    }
     do_scheduler();
 }
 
@@ -167,8 +169,8 @@ void do_unblock_one(queue_t *queue)
     item = queue_dequeue(queue);
     if (item->status != TASK_EXITED) {
         item->status = TASK_READY;
+        queue_push(&ready_queue, item);
     }
-    queue_push(&ready_queue, item);
 }
 
 void do_unblock_all(queue_t *queue)
@@ -178,8 +180,8 @@ void do_unblock_all(queue_t *queue)
         item = queue_dequeue(queue);
         if (item->status != TASK_EXITED) {
             item->status = TASK_READY;
+            queue_push(&ready_queue, item);
         }
-        queue_push(&ready_queue, item);
     }
 }
 
@@ -247,6 +249,16 @@ int do_kill(pid_t pid)
             }
         }
         pcb[i].status = TASK_EXITED;
+        do_unblock_all(&pcb[i].wait_queue);
+        // free stack
+        free_kernel_stack(pcb[i].kernel_stack_top);
+        free_user_stack(pcb[i].user_stack_top);
+        // free the lock
+        while (!queue_is_empty(&pcb[i].lock_queue)) {
+            mutex_lock_t * lock = queue_dequeue(&pcb[i].lock_queue);
+            do_unblock_all(&lock->queue);
+            lock->status = UNLOCKED;
+        }
         return 0;
     }
 }
