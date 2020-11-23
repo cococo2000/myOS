@@ -156,6 +156,7 @@ void do_block(queue_t *queue)
 {
     current_running->status = TASK_BLOCKED;
     queue_push(queue, (void*)current_running);
+    do_scheduler();
 }
 
 void do_unblock_one(queue_t *queue)

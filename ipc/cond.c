@@ -12,10 +12,9 @@ void do_condition_wait(mutex_lock_t *lock, condition_t *condition)
 {
     /* [1] release the lock so other task can operate on the condition */
     do_mutex_lock_release(lock);
-    do_block(&condition->cond_queue);
 
     /* [2] do scheduler */
-    do_scheduler();
+    do_block(&condition->cond_queue);
 
     /* [3] acquire lock */
     do_mutex_lock_acquire(lock);
@@ -24,7 +23,9 @@ void do_condition_wait(mutex_lock_t *lock, condition_t *condition)
 /* unblock one task */
 void do_condition_signal(condition_t *condition)
 {
-    do_unblock_one(&condition->cond_queue);
+    if (!queue_is_empty(&condition->cond_queue)){
+        do_unblock_one(&condition->cond_queue);
+    }
 }
 
 /* unblock all task */

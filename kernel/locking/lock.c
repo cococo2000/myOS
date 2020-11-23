@@ -30,7 +30,6 @@ void do_mutex_lock_acquire(mutex_lock_t *lock)
 {
     if(lock->status == LOCKED){
         do_block(&lock->queue);
-        do_scheduler();
     }else{
         queue_push(&current_running->lock_queue, lock);
         lock->status = LOCKED;
