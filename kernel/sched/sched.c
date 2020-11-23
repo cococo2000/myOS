@@ -101,7 +101,9 @@ static void check_sleeping()
         uint32_t current_time = get_timer();
         if((temp->sleep_end_time < current_time) || (temp->sleep_begin_time > current_time)){
             pcb_t * p = queue_remove(&block_queue, temp);
-            temp->status = TASK_READY;
+            if (temp->status != TASK_EXITED) {
+                temp->status = TASK_READY;
+            }
             queue_push(&ready_queue, temp);
             temp = p;
         }else{
@@ -163,7 +165,9 @@ void do_unblock_one(queue_t *queue)
 {
     pcb_t *item;
     item = queue_dequeue(queue);
-    item->status = TASK_READY;
+    if (item->status != TASK_EXITED) {
+        item->status = TASK_READY;
+    }
     queue_push(&ready_queue, item);
 }
 
@@ -172,7 +176,9 @@ void do_unblock_all(queue_t *queue)
     pcb_t *item;
     while(!queue_is_empty(queue)){
         item = queue_dequeue(queue);
-        item->status = TASK_READY;
+        if (item->status != TASK_EXITED) {
+            item->status = TASK_READY;
+        }
         queue_push(&ready_queue, item);
     }
 }
