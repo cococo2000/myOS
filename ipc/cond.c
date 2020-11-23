@@ -23,7 +23,8 @@ void do_condition_wait(mutex_lock_t *lock, condition_t *condition)
 /* unblock one task */
 void do_condition_signal(condition_t *condition)
 {
-    if (!queue_is_empty(&condition->cond_queue)){
+    if (!queue_is_empty(&condition->cond_queue))
+    {
         do_unblock_one(&condition->cond_queue);
     }
 }

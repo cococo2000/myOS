@@ -28,10 +28,12 @@ void init_stack()
     uint64_t kernel_stack_top = STACK_MAX;
     uint64_t user_stack_top = STACK_MIN;
     int i;
-    for (i = 0; i < NUM_KERNEL_STACK; i++) {
+    for (i = 0; i < NUM_KERNEL_STACK; i++)
+    {
         kernel_stack[i] = kernel_stack_top - i * STACK_SIZE;
     }
-    for (i = 0; i < NUM_KERNEL_STACK; i++) {
+    for (i = 0; i < NUM_KERNEL_STACK; i++)
+    {
         user_stack[i] = user_stack_top + i * STACK_SIZE;
     }
 }
@@ -86,27 +88,33 @@ void set_pcb(pid_t pid, pcb_t *pcb, task_info_t *task_info)
 }
 
 /* ready queue to run */
-queue_t ready_queue ;
+queue_t ready_queue;
 
 /* block queue to wait */
-queue_t block_queue ;
+queue_t block_queue;
 
 static void check_sleeping()
 {
-    if(queue_is_empty(&block_queue)){
+    if (queue_is_empty(&block_queue))
+    {
         return;
     }
-    pcb_t* temp = block_queue.head;
-    while(temp != NULL){
+    pcb_t *temp = block_queue.head;
+    while (temp != NULL)
+    {
         uint32_t current_time = get_timer();
-        if((temp->sleep_end_time < current_time) || (temp->sleep_begin_time > current_time)){
-            pcb_t * p = queue_remove(&block_queue, temp);
-            if (temp->status != TASK_EXITED) {
+        if ((temp->sleep_end_time < current_time) || (temp->sleep_begin_time > current_time))
+        {
+            pcb_t *p = queue_remove(&block_queue, temp);
+            if (temp->status != TASK_EXITED)
+            {
                 temp->status = TASK_READY;
             }
             queue_push(&ready_queue, temp);
             temp = p;
-        }else{
+        }
+        else
+        {
             temp = temp->next;
         }
     }
@@ -114,22 +122,27 @@ static void check_sleeping()
 
 void scheduler(void)
 {
-    if (current_running->mode == KERNEL_MODE) {
+    if (current_running->mode == KERNEL_MODE)
+    {
         // store the cursor
         current_running->cursor_x = screen_cursor_x;
         current_running->cursor_y = screen_cursor_y;
 
         check_sleeping();
-        if (current_running->status != TASK_BLOCKED && current_running->status != TASK_EXITED) {
+        if (current_running->status != TASK_BLOCKED && current_running->status != TASK_EXITED)
+        {
             current_running->status = TASK_READY;
-            if (current_running->pid != 0) {
+            if (current_running->pid != 0)
+            {
                 queue_push(&ready_queue, current_running);
             }
         }
-        if (!queue_is_empty(&ready_queue)) {
+        if (!queue_is_empty(&ready_queue))
+        {
             // current_running = (pcb_t *)priority_queue_dequeue(&ready_queue);
             current_running = (pcb_t *)queue_dequeue(&ready_queue);
-            if (current_running->status == TASK_EXITED) {
+            if (current_running->status == TASK_EXITED)
+            {
                 do_exit();
             }
         }
@@ -147,18 +160,20 @@ void scheduler(void)
         screen_cursor_x = current_running->cursor_x;
         screen_cursor_y = current_running->cursor_y;
     }
-    else {
+    else
+    {
         // error
-        char * input = (char *)0x123455;
+        char *input = (char *)0x123455;
         char c = (*input);
     }
 }
 
 void do_block(queue_t *queue)
 {
-    if (current_running->status != TASK_EXITED) {
+    if (current_running->status != TASK_EXITED)
+    {
         current_running->status = TASK_BLOCKED;
-        queue_push(queue, (void*)current_running);
+        queue_push(queue, (void *)current_running);
     }
     do_scheduler();
 }
@@ -167,7 +182,8 @@ void do_unblock_one(queue_t *queue)
 {
     pcb_t *item;
     item = queue_dequeue(queue);
-    if (item->status != TASK_EXITED) {
+    if (item->status != TASK_EXITED)
+    {
         item->status = TASK_READY;
         queue_push(&ready_queue, item);
     }
@@ -176,9 +192,11 @@ void do_unblock_one(queue_t *queue)
 void do_unblock_all(queue_t *queue)
 {
     pcb_t *item;
-    while(!queue_is_empty(queue)){
+    while (!queue_is_empty(queue))
+    {
         item = queue_dequeue(queue);
-        if (item->status != TASK_EXITED) {
+        if (item->status != TASK_EXITED)
+        {
             item->status = TASK_READY;
             queue_push(&ready_queue, item);
         }
@@ -188,7 +206,8 @@ void do_unblock_all(queue_t *queue)
 int do_spawn(task_info_t *task)
 {
     int i = 0;
-    while (i < NUM_MAX_TASK && pcb[i].status != TASK_EXITED) {
+    while (i < NUM_MAX_TASK && pcb[i].status != TASK_EXITED)
+    {
         i++;
     }
     set_pcb(process_id, &pcb[i], task);
@@ -206,14 +225,14 @@ void do_exit(void)
     free_kernel_stack(current_running->kernel_stack_top);
     free_user_stack(current_running->user_stack_top);
     // free the lock
-    while (!queue_is_empty(&current_running->lock_queue)) {
-        mutex_lock_t * lock = queue_dequeue(&current_running->lock_queue);
+    while (!queue_is_empty(&current_running->lock_queue))
+    {
+        mutex_lock_t *lock = queue_dequeue(&current_running->lock_queue);
         do_unblock_all(&lock->queue);
         lock->status = UNLOCKED;
     }
     do_scheduler();
 }
-
 
 void do_sleep(uint32_t sleep_time)
 {
@@ -227,22 +246,28 @@ void do_sleep(uint32_t sleep_time)
 int do_kill(pid_t pid)
 {
     int i = 0;
-    if (pid == 0) {
+    if (pid == 0)
+    {
         kprintf("kill task0 is not allowed.\n");
         return -1;
     }
-    else if (pid == 1) {
+    else if (pid == 1)
+    {
         kprintf("kill shell_task is not allowed.\n");
         return -1;
     }
-    else {
-        if (current_running->pid == pid) {
+    else
+    {
+        if (current_running->pid == pid)
+        {
             do_exit();
             return 0;
         }
-        while (pcb[i].pid != pid || pcb[i].status == TASK_EXITED) {
+        while (pcb[i].pid != pid || pcb[i].status == TASK_EXITED)
+        {
             i++;
-            if (i >= NUM_MAX_TASK) {
+            if (i >= NUM_MAX_TASK)
+            {
                 // error
                 kprintf("Kill task pid = %d is non-existent.\n", pid);
                 return -1;
@@ -254,8 +279,9 @@ int do_kill(pid_t pid)
         free_kernel_stack(pcb[i].kernel_stack_top);
         free_user_stack(pcb[i].user_stack_top);
         // free the lock
-        while (!queue_is_empty(&pcb[i].lock_queue)) {
-            mutex_lock_t * lock = queue_dequeue(&pcb[i].lock_queue);
+        while (!queue_is_empty(&pcb[i].lock_queue))
+        {
+            mutex_lock_t *lock = queue_dequeue(&pcb[i].lock_queue);
             do_unblock_all(&lock->queue);
             lock->status = UNLOCKED;
         }
@@ -266,15 +292,18 @@ int do_kill(pid_t pid)
 int do_waitpid(pid_t pid)
 {
     int i = 0;
-    while (pcb[i].pid != pid || pcb[i].status == TASK_EXITED) {
+    while (pcb[i].pid != pid || pcb[i].status == TASK_EXITED)
+    {
         i++;
-        if (i >= NUM_MAX_TASK) {
+        if (i >= NUM_MAX_TASK)
+        {
             // error
             kprintf("\nWait task pid = %d is non-existent.\n", pid);
             return -1;
         }
     }
-    if (pcb[i].status != TASK_EXITED) {
+    if (pcb[i].status != TASK_EXITED)
+    {
         current_running->status = TASK_BLOCKED;
         queue_push(&(pcb[i].wait_queue), current_running);
         do_scheduler();
@@ -287,19 +316,21 @@ void do_process_show()
 {
     kprintf("[PROCESS TABLE]\n");
     int num, items = 0;
-    for (num = 0; num < NUM_MAX_TASK; num++) {
-        switch(pcb[num].status) {
-            case TASK_BLOCKED:
-                kprintf("[%d] PID: %d Name: %s Status : BLOCKED\n", items++, pcb[num].pid, pcb[num].name);
-                break;
-            case TASK_RUNNING:
-                kprintf("[%d] PID: %d Name: %s Status : RUNNING\n", items++, pcb[num].pid, pcb[num].name);
-                break;
-            case TASK_READY:
-                kprintf("[%d] PID: %d Name: %s Status : READY\n", items++, pcb[num].pid, pcb[num].name);
-                break;
-            default:
-                break;
+    for (num = 0; num < NUM_MAX_TASK; num++)
+    {
+        switch (pcb[num].status)
+        {
+        case TASK_BLOCKED:
+            kprintf("[%d] PID: %d Name: %s Status : BLOCKED\n", items++, pcb[num].pid, pcb[num].name);
+            break;
+        case TASK_RUNNING:
+            kprintf("[%d] PID: %d Name: %s Status : RUNNING\n", items++, pcb[num].pid, pcb[num].name);
+            break;
+        case TASK_READY:
+            kprintf("[%d] PID: %d Name: %s Status : READY\n", items++, pcb[num].pid, pcb[num].name);
+            break;
+        default:
+            break;
         }
     }
 }
