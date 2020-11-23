@@ -15,6 +15,6 @@ void do_barrier_wait(barrier_t *barrier)
     }
     else if (barrier->waiting_num == barrier->barry_n) {
         do_unblock_all(&barrier->barry_queue);
-        barrier->waiting_num == 0;
+        barrier->waiting_num = 0;
     }
 }
