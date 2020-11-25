@@ -85,13 +85,13 @@ void mbox_send(mailbox_t *mailbox, void *msg, int msg_length)
     }
     if (MSG_MAX_SIZE - mailbox->msg_tail < msg_length)
     {
-        memcpy((uint8_t *)(mailbox->msg + mailbox->msg_tail), (uint8_t *)msg, MSG_MAX_SIZE - mailbox->msg_tail);
+        memcpy((char *)(mailbox->msg + mailbox->msg_tail), (char *)msg, MSG_MAX_SIZE - mailbox->msg_tail);
         mailbox->msg_tail = msg_length - (MSG_MAX_SIZE - mailbox->msg_tail);
-        memcpy((uint8_t *)mailbox->msg, (uint8_t *)(msg + msg_length - mailbox->msg_tail), mailbox->msg_tail);
+        memcpy((char *)mailbox->msg, (char *)(msg + msg_length - mailbox->msg_tail), mailbox->msg_tail);
     }
     else
     {
-        memcpy((uint8_t *)(mailbox->msg + mailbox->msg_tail), (uint8_t *)msg, msg_length);
+        memcpy((char *)(mailbox->msg + mailbox->msg_tail), (char *)msg, msg_length);
         mailbox->msg_tail += msg_length;
     }
     mailbox->used_size += msg_length;
@@ -108,13 +108,13 @@ void mbox_recv(mailbox_t *mailbox, void *msg, int msg_length)
     }
     if (MSG_MAX_SIZE - mailbox->msg_head < msg_length)
     {
-        memcpy((uint8_t *)msg, (uint8_t *)(mailbox->msg + mailbox->msg_head), MSG_MAX_SIZE - mailbox->msg_head);
+        memcpy((char *)msg, (char *)(mailbox->msg + mailbox->msg_head), MSG_MAX_SIZE - mailbox->msg_head);
         mailbox->msg_head = msg_length - (MSG_MAX_SIZE - mailbox->msg_head);
-        memcpy((uint8_t *)(msg + msg_length - mailbox->msg_head), (uint8_t *)mailbox->msg, mailbox->msg_head);
+        memcpy((char *)(msg + msg_length - mailbox->msg_head), (char *)mailbox->msg, mailbox->msg_head);
     }
     else
     {
-        memcpy((uint8_t *)msg, (uint8_t *)(mailbox->msg + mailbox->msg_head), msg_length);
+        memcpy((char *)msg, (char *)(mailbox->msg + mailbox->msg_head), msg_length);
         mailbox->msg_head += msg_length;
     }
     mailbox->used_size -= msg_length;

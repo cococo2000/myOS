@@ -8,8 +8,8 @@
 #define MSG_MAX_SIZE 100
 typedef struct mailbox
 {
-    char name[30];
-    uint8_t msg[MSG_MAX_SIZE];
+    char name[32];
+    char msg[MSG_MAX_SIZE];
     int msg_head, msg_tail;
     int used_size;
     int cited;
