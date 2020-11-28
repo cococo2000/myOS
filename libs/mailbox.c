@@ -79,11 +79,12 @@ void mbox_close(mailbox_t *mailbox)
 void mbox_send(mailbox_t *mailbox, void *msg, int msg_length)
 {
     mutex_lock_acquire(&mailbox->mutex);
-    while (MSG_MAX_SIZE - mailbox->used_size < msg_length)
+    while (mailbox->used_size + msg_length > MSG_MAX_SIZE)
+    // mailbox is full
     {
-        condition_wait(&mailbox->mutex, &mailbox->empty);
+        condition_wait(&mailbox->mutex, &mailbox->full);
     }
-    if (MSG_MAX_SIZE - mailbox->msg_tail < msg_length)
+    if (mailbox->msg_tail + msg_length > MSG_MAX_SIZE)
     {
         memcpy((char *)(mailbox->msg + mailbox->msg_tail), (char *)msg, MSG_MAX_SIZE - mailbox->msg_tail);
         mailbox->msg_tail = msg_length - (MSG_MAX_SIZE - mailbox->msg_tail);
@@ -95,7 +96,7 @@ void mbox_send(mailbox_t *mailbox, void *msg, int msg_length)
         mailbox->msg_tail += msg_length;
     }
     mailbox->used_size += msg_length;
-    condition_broadcast(&mailbox->full);
+    condition_broadcast(&mailbox->empty);
     mutex_lock_release(&mailbox->mutex);
 }
 
@@ -104,13 +105,13 @@ void mbox_recv(mailbox_t *mailbox, void *msg, int msg_length)
     mutex_lock_acquire(&mailbox->mutex);
     while (mailbox->used_size < msg_length)
     {
-        condition_wait(&mailbox->mutex, &mailbox->full);
+        condition_wait(&mailbox->mutex, &mailbox->empty);
     }
-    if (MSG_MAX_SIZE - mailbox->msg_head < msg_length)
+    if (mailbox->msg_tail + msg_length > MSG_MAX_SIZE)
     {
         memcpy((char *)msg, (char *)(mailbox->msg + mailbox->msg_head), MSG_MAX_SIZE - mailbox->msg_head);
         mailbox->msg_head = msg_length - (MSG_MAX_SIZE - mailbox->msg_head);
-        memcpy((char *)(msg + msg_length - mailbox->msg_head), (char *)mailbox->msg, mailbox->msg_head);
+        memcpy(((char *)msg + msg_length - mailbox->msg_head), (char *)mailbox->msg, mailbox->msg_head);
     }
     else
     {
@@ -118,6 +119,6 @@ void mbox_recv(mailbox_t *mailbox, void *msg, int msg_length)
         mailbox->msg_head += msg_length;
     }
     mailbox->used_size -= msg_length;
-    condition_broadcast(&mailbox->empty);
+    condition_broadcast(&mailbox->full);
     mutex_lock_release(&mailbox->mutex);
 }

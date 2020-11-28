@@ -41,7 +41,7 @@ void do_mutex_lock_release(mutex_lock_t *lock)
     queue_remove(&current_running->lock_queue, lock);
     if(!queue_is_empty(&lock->queue)){
         do_unblock_one(&lock->queue);
-        do_scheduler();
+        // do_scheduler();
     }else{
         lock->status = UNLOCKED;
     }
