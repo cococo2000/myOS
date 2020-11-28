@@ -107,7 +107,7 @@ void mbox_recv(mailbox_t *mailbox, void *msg, int msg_length)
     {
         condition_wait(&mailbox->mutex, &mailbox->empty);
     }
-    if (mailbox->msg_tail + msg_length > MSG_MAX_SIZE)
+    if (mailbox->msg_head + msg_length > MSG_MAX_SIZE)
     {
         memcpy((char *)msg, (char *)(mailbox->msg + mailbox->msg_head), MSG_MAX_SIZE - mailbox->msg_head);
         mailbox->msg_head = msg_length - (MSG_MAX_SIZE - mailbox->msg_head);
