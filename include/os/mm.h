@@ -3,10 +3,13 @@
 #include "type.h"
 #include "sched.h"
 
+#define PGSIZE 4096 // 4KB
+
 typedef struct PTE
 {
 
-} PTE_t; /* 128 + 28 = 156B */
+} PTE_t; 
+// ? /* 128 + 28 = 156B */
 
 void init_page_table();
 void do_TLB_Refill();

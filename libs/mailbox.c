@@ -87,7 +87,7 @@ void mbox_send(mailbox_t *mailbox, void *msg, int msg_length)
     {
         memcpy((char *)(mailbox->msg + mailbox->msg_tail), (char *)msg, MSG_MAX_SIZE - mailbox->msg_tail);
         mailbox->msg_tail = msg_length - (MSG_MAX_SIZE - mailbox->msg_tail);
-        memcpy((char *)mailbox->msg, (char *)(msg + msg_length - mailbox->msg_tail), mailbox->msg_tail);
+        memcpy((char *)mailbox->msg, ((char *)msg + msg_length - mailbox->msg_tail), mailbox->msg_tail);
     }
     else
     {
