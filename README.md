@@ -6,7 +6,11 @@ A repository for OSLab-MIPS 2020 in UCAS.
 
 - [x] Project1 Bootloader
 - [x] Project2 Simple Kernel
-- [ ] Project3 Interactive OS and Process Management
+- [ ] Project3 Interactive OS and Process Management 
+    - [x] S-core
+    - [ ] A-core: Synchronization done.
+- [ ] Project 4 Virtual Memory
+- [ ] Project 5 
 
 ## Project1 Bootloader
 
@@ -45,3 +49,11 @@ A repository for OSLab-MIPS 2020 in UCAS.
 8. ##### done！
 
 ## Project2 Simple Kernel
+
+
+
+## Project3 Interactive OS and Process Management 
+
+
+
+## Project 4 Virtual Memory
