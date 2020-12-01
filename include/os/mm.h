@@ -8,6 +8,7 @@
 typedef struct PTE
 {
     uint32_t pte;
+    uint32_t sd_sect;
 } PTE_t; 
 // ? /* 128 + 28 = 156B */
 
