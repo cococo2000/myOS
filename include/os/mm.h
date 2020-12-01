@@ -7,7 +7,7 @@
 
 typedef struct PTE
 {
-
+    uint32_t pte;
 } PTE_t; 
 // ? /* 128 + 28 = 156B */
 
