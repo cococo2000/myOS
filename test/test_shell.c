@@ -100,6 +100,7 @@ char read_shell_buff()
     return ch;
 }
 
+// decimal
 int my_atoi(char s[])
 {
     int i = 0;
@@ -128,7 +129,7 @@ void execute(uint32_t argc, char argv[][10])
         int pid = my_atoi(argv[1]);
         if (!strcmp(argv[0], "exec")) {
             printf("exec process[%d].\n", pid);
-            sys_spawn(test_tasks[pid]);
+            sys_spawn(test_tasks[pid], NULL);
         }
         else if (!strcmp(argv[0], "kill")) {
             if (!sys_kill(pid)) {
@@ -140,7 +141,14 @@ void execute(uint32_t argc, char argv[][10])
         }
     }
     else if (argc) {
-        printf("Command '%s' not found!\n", argv[0]);
+        if (argc == 6 && !strcmp(argv[0], "exec")) {
+            int pid = my_atoi(argv[1]);
+            printf("exec process[%d].\n", pid);
+            sys_spawn(test_tasks[pid], argv);
+        }
+        else {
+            printf("Command '%s' not found!\n", argv[0]);
+        }
     }
 }
 

@@ -14,6 +14,7 @@ int rand()
     return current_time % 100000;
 }
 
+// hex
 int atoi(char *str)
 {
     int ret = 0;
