@@ -7,9 +7,17 @@
 #include "test4.h"
 
 #define RW_TIMES 3
+
+int rand()
+{
+    int current_time = sys_get_timer();
+    return current_time % 100000;
+}
+
 int atoi(char *input)
 {
 }
+
 void rw_task1(char *argv[])
 {
 	int mem1, mem2 = 0;
@@ -18,7 +26,7 @@ void rw_task1(char *argv[])
 
 	int i = 0;
 
-	srand((uint32_t)get_ticks());
+	// srand((uint32_t)get_ticks());
 	for (i = 0; i < RW_TIMES; i++)
 	{
 		sys_move_cursor(1, curs + i);
