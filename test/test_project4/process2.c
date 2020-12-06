@@ -14,8 +14,31 @@ int rand()
     return current_time % 100000;
 }
 
-int atoi(char *input)
+int atoi(char *str)
 {
+    int base = 16;
+    if ((str[0] == '0' && str[1] == 'x') || (str[0] == '0' && str[1] == 'X')) {
+        base = 16;
+        str += 2;
+    }
+    int ret = 0;
+    while (*str != '\0') {
+        if ('0' <= *str && *str <= '9') {
+            ret = ret * base + (*str - '0');
+        } else if (base == 16) {
+            if ('a' <= *str && *str <= 'f'){
+                ret = ret * base + (*str - 'a' + 10);
+            } else if ('A' <= *str && *str <= 'F') {
+                ret = ret * base + (*str - 'A' + 10);
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+        ++str;
+    }
+    return ret;
 }
 
 void rw_task1(char *argv[])
