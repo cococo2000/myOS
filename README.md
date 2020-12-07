@@ -10,17 +10,24 @@ A repository for OSLab-MIPS 2020 in UCAS.
     - [x] S-core
     - [ ] A-core: Synchronization done.
 - [ ] Project 4 Virtual Memory
+    - [x] S-core
+    - [ ] A-core: to do
 - [ ] Project 5 
+- [ ] Project 6
+
+## Report
+
+对应实验设计文档见 `/report`目录。
 
 ## Project1 Bootloader
 
 ### 主要模块
 
-/arch/mips/boot/bootblock.S 实现bootloader引导kernel的功能（重定位+大核加载）
+`/arch/mips/boot/bootblock.S` 实现 `bootloader` 引导 `kernel` 的功能（重定位+大核加载）
 
-/test/kernel.c实现一个小的操作系统内核，具有打印字符串和回显输入字符的功能
+`/test/kernel.c`实现一个小的操作系统内核，具有打印字符串和回显输入字符的功能
 
-/tools/createimage.c实现将bootblock和kernel合并为一个完整SD卡镜像文件。
+`/tools/createimage.c` 实现将 `bootblock` 和 `kernel` 合并为一个完整SD卡镜像文件。
 
 ### 运行
 
@@ -57,3 +64,12 @@ A repository for OSLab-MIPS 2020 in UCAS.
 
 
 ## Project 4 Virtual Memory
+
+
+
+## Project 5
+
+
+
+## Project 6
+
