@@ -10,14 +10,19 @@ main:
 	# 2) call BIOS read kernel in SD card
 	ld $a0, kernel
 	li $a1, 0x200
+	# (1)
 	# li $a2, 0x200
-	dla $a2, kernel_size
-	ld $a2,0($a2)
-	lh $a2,0($a2)
+	# (2)
+	# dla $a2, kernel_size
+	# ld $a2,0($a2)
+	# lh $a2,0($a2)
+	# dsll $a2, $a2, 9
+	# (3)
+	li $a2, 0x100
 	dsll $a2, $a2, 9
 	ld $t0, read_sd_card
-	ld $ra, kernel_main
-	jr $t0
+	# ld $ra, kernel_main
+	jal $t0
 
 	# 3) jump to kernel
 	ld $t0, kernel_main
@@ -45,9 +50,9 @@ printstr: .dword 0xffffffff8f0d5534
 printch: .dword 0xffffffff8f0d5570
 
 # 4. kernel address (move kernel to here ~)
-kernel : .dword 0xffffffffa0800000
+kernel : .dword 0xffffffffa0800200
 
 # 5. kernel main address (jmp here to start kernel main!)
-kernel_main : .dword 0xffffffffa0800000
+kernel_main : .dword 0xffffffffa0800200
 
 kernel_size : .dword 0xffffffffa08001fc
