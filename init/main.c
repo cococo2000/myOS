@@ -45,6 +45,7 @@
 uint64_t stack_top = STACK_MAX;
 static void init_memory()
 {
+    init_TLB();
 }
 
 static void init_pcb0(){
@@ -95,10 +96,13 @@ static void init_exception_handler()
 {
     int i;
     for(i = 1; i < 32; i++){
-        exception_handler[i]=(uint64_t)handle_other;
+        exception_handler[i] = (uint64_t)handle_other;
     }
-    exception_handler[INT]=(uint64_t)handle_int;
-    exception_handler[SYS]=(uint64_t)handle_syscall;
+    exception_handler[INT ] = (uint64_t)handle_int;
+    // exception_handler[MOD ] = (uint64_t)handle_mod;
+    exception_handler[TLBL] = (uint64_t)handle_tlb;
+    exception_handler[TLBS] = (uint64_t)handle_tlb;
+    exception_handler[SYS ] = (uint64_t)handle_syscall;
 }
 
 static void init_exception()
@@ -106,7 +110,10 @@ static void init_exception()
     /* fill nop */
     init_exception_handler();
     /* fill nop */
+    // exception_handler_entry
     memcpy(0xffffffff80000180, exception_handler_entry, (char *)exception_handler_end - (char *)exception_handler_begin);
+    // TLB exception_handler_entry
+    memcpy(0xffffffff80000000, TLBexception_handler_entry, (char *)TLBexception_handler_end - (char *)TLBexception_handler_begin);
     set_cp0_cause(0x00000000);
     set_cp0_status(initial_cp0_status);
     /* set COUNT & set COMPARE */
