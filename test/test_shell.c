@@ -100,16 +100,31 @@ char read_shell_buff()
     return ch;
 }
 
-// decimal
-int my_atoi(char s[])
+int atoi(char *str)
 {
-    int i = 0;
-    int value = 0;
-    while (s[i] >= '0' && s[i] <= '9') {
-        value = value * 10 + (s[i] - '0');
-        i++;
+    int ret = 0;
+    int base = 10;
+    if ((str[0] == '0' && str[1] == 'x') || (str[0] == '0' && str[1] == 'X')) {
+        base = 16;
+        str += 2;
     }
-    return value;
+    while (*str != '\0') {
+        if ('0' <= *str && *str <= '9') {
+            ret = ret * base + (*str - '0');
+        } else if (base == 16) {
+            if ('a' <= *str && *str <= 'f'){
+                ret = ret * base + (*str - 'a' + 10);
+            } else if ('A' <= *str && *str <= 'F') {
+                ret = ret * base + (*str - 'A' + 10);
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+        ++str;
+    }
+    return ret;
 }
 
 void execute(uint32_t argc, char argv[][10])
@@ -126,7 +141,7 @@ void execute(uint32_t argc, char argv[][10])
         }
     }
     else if (argc == 2) {
-        int pid = my_atoi(argv[1]);
+        int pid = atoi(argv[1]);
         if (!strcmp(argv[0], "exec")) {
             printf("exec process[%d].\n", pid);
             sys_spawn(test_tasks[pid], NULL);
@@ -142,7 +157,7 @@ void execute(uint32_t argc, char argv[][10])
     }
     else if (argc) {
         if (argc == 6 && !strcmp(argv[0], "exec")) {
-            int pid = my_atoi(argv[1]);
+            int pid = atoi(argv[1]);
             printf("exec process[%d].\n", pid);
             sys_spawn(test_tasks[pid], argv);
         }

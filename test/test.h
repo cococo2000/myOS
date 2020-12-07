@@ -47,7 +47,7 @@
 #include "sched.h"
 
 void test_shell(void);
-
+int atoi(char *str);
 extern struct task_info shell_task;
 extern struct task_info *shell_tasks[16];
 extern int num_shell_tasks;
