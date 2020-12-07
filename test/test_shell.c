@@ -154,7 +154,7 @@ void execute(uint32_t argc, char argv[][10])
 
 void test_shell()
 {
-    char command[20];
+    char command[100];
     uint32_t argc;
     char argv[8][10];
     uint32_t i = 0;

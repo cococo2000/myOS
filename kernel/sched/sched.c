@@ -203,7 +203,7 @@ void do_unblock_all(queue_t *queue)
     }
 }
 
-int do_spawn(task_info_t *task, char *argv[])
+int do_spawn(task_info_t *task, char argv[][10])
 {
     int i = 0;
     while (i < NUM_MAX_TASK && pcb[i].status != TASK_EXITED)

@@ -42,7 +42,7 @@ int atoi(char *str)
     return ret;
 }
 
-void rw_task1(char *argv[])
+void rw_task1(char argv[][10])
 {
     int mem1, mem2 = 0;
     int curs = 0;

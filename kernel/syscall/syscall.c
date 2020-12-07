@@ -17,7 +17,7 @@ void system_call_helper(uint64_t fn, uint64_t arg1, uint64_t arg2, uint64_t arg3
     current_running->mode = USER_MODE;
 }
 
-void sys_spawn(task_info_t *info, char *argv[])
+void sys_spawn(task_info_t *info, char argv[][10])
 {
     invoke_syscall(SYSCALL_SPAWN, (uint64_t)info, (uint64_t)argv, IGNORE);
 }
