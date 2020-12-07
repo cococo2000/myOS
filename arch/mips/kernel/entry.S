@@ -130,6 +130,74 @@ NESTED(do_scheduler, 0, ra)
     jr      ra
 END(do_scheduler)
 
+.global exception_handler_begin
+.global exception_handler_end
+.global TLBexception_handler_begin
+.global TLBexception_handler_end
+.global exception_handler_exit
+
+NESTED(TLBexception_handler_entry, 0, sp)
+TLBexception_handler_begin:
+    
+
+TLBexception_handler_end:
+END(TLBexception_handler_entry)
+
+NESTED(exception_handler_entry, 0, sp)   
+exception_handler_begin:
+    // jump exception_handler[i] which decided by CP0_CAUSE: EXCCODE
+    mfc0 k0, CP0_CAUSE
+    andi k0, k0, CAUSE_EXCCODE
+    dla k1, exception_handler
+    add k0 ,k0, k0
+    add k0, k0, k1
+    ld  k1, 0(k0)
+    jr  k1
+exception_handler_end:
+END(exception_handler_entry)
+
+NESTED(handle_int, 0, sp)
+    SAVE_CONTEXT(USER)
+    mfc0    a0, CP0_STATUS
+    mfc0    a1, CP0_CAUSE
+    jal     interrupt_helper
+    nop
+    j       exception_handler_exit
+END(handle_int)
+
+NESTED(handle_syscall, 0, sp)
+    dmfc0 k0, CP0_EPC
+    daddi k0, k0, 0x4
+    dmtc0 k0, CP0_EPC
+    SAVE_CONTEXT(USER)
+    move a3, a2
+    move a2, a1
+    move a1, a0
+    move a0, v0
+    jal system_call_helper
+    nop
+    j   exception_handler_exit
+END(handle_syscall)
+
+NESTED(handle_tlb, 0, sp)
+    
+END(handle_tlb)
+
+NESTED(handle_other, 0, sp)
+    dmfc0 k0, CP0_EPC
+    daddi k0, k0, 0x4
+    dmtc0 k0, CP0_EPC
+    SAVE_CONTEXT(USER)
+    jal     interrupt_helper
+    nop
+    j   exception_handler_exit
+END(handle_other)
+
+LEAF(exception_handler_exit)
+    RESTORE_CONTEXT(USER)
+    eret
+END(exception_handler_exit)
+
 LEAF(reset_timer)
     mtc0 a0, CP0_COMPARE
     mtc0 zero, CP0_COUNT
@@ -181,85 +249,19 @@ LEAF(get_cp0_epc)
     jr ra
 END(get_cp0_epc)
 
-.global exception_handler_begin
-.global exception_handler_end
-.global TLBexception_handler_begin
-.global TLBexception_handler_end
-.global exception_handler_exit
-
-NESTED(TLBexception_handler_entry, 0, sp)
-TLBexception_handler_begin:
-    
-
-TLBexception_handler_end:
-END(TLBexception_handler_entry)
-
-NESTED(exception_handler_entry, 0, sp)   
-exception_handler_begin:
-    // jump exception_handler[i] which decided by CP0_CAUSE: EXCCODE
-    mfc0 k0, CP0_CAUSE
-    andi k0, k0, CAUSE_EXCCODE
-    dla k1, exception_handler
-    add k0 ,k0, k0
-    add k0, k0, k1
-    ld  k1, 0(k0)
-    jr  k1
-exception_handler_end:
-END(exception_handler_entry)
-
-NESTED(handle_int, 0, sp)
-    SAVE_CONTEXT(USER)
-    mfc0    a0, CP0_STATUS
-    mfc0    a1, CP0_CAUSE
-    jal     interrupt_helper
-    nop
-    j       exception_handler_exit
-END(handle_int)
-
-NESTED(handle_syscall, 0, sp)
-    dmfc0 k0, CP0_EPC
-    daddi k0, k0, 0x4
-    dmtc0 k0, CP0_EPC
-    SAVE_CONTEXT(USER)
-    move a3, a2
-    move a2, a1
-    move a1, a0
-    move a0, v0
-    jal system_call_helper
-    nop
-    j   exception_handler_exit
-END(handle_syscall)
-
-NESTED(handle_tlb, 0, sp)
-   
-END(handle_tlb)
-
-NESTED(handle_other, 0, sp)
-    dmfc0 k0, CP0_EPC
-    daddi k0, k0, 0x4
-    dmtc0 k0, CP0_EPC
-    SAVE_CONTEXT(USER)
-    jal     interrupt_helper
-    nop
-    j   exception_handler_exit
-END(handle_other)
-
-LEAF(exception_handler_exit)
-    RESTORE_CONTEXT(USER)
-    eret
-END(exception_handler_exit)
-
 LEAF(set_cp0_entryhi)
-   
+    dmtc0 a0, CP0_ENTRYHI
+    jr ra
 END(set_cp0_entryhi)
 
-
 LEAF(get_cp0_index)
-    
+    mfc0 v0, CP0_INDEX
+    jr ra
 END(get_cp0_index)
 
 LEAF(set_cp0_index)
-    
+    mtc0 a0, CP0_INDEX
+    jr ra
 END(set_cp0_index)
 
 LEAF(get_cp0_badvaddr)
@@ -268,41 +270,48 @@ LEAF(get_cp0_badvaddr)
 END(get_cp0_badvaddr)
 
 LEAF(get_cp0_entrylo0)
-    
+    dmfc0 v0, CP0_ENTRYLO0
+    jr ra
 END(get_cp0_entrylo0)
 
 LEAF(set_cp0_entrylo0)
-    
+    dmtc0 a0,CP0_ENTRYLO0
+    jr ra
 END(set_cp0_entrylo0)
 
 LEAF(get_cp0_entrylo1)
-    
+    dmfc0 v0, CP0_ENTRYLO1
+    jr ra
 END(get_cp0_entrylo1)
 
 LEAF(set_cp0_entrylo1)
-   
+    dmfc0 v0, CP0_ENTRYLO1
+    jr ra
 END(set_cp0_entrylo1)
 
 LEAF(set_cp0_pagemask)
-    
+    dmtc0 a0, CP0_PAGEMASK
+    jr ra
 END(set_cp0_pagemask)
 
 LEAF(tlbwr_operation)
-   
+    tlbwr
+    jr ra
 END(tlbwr_operation)
 
 LEAF(tlbwi_operation)
-    
+    tlbwi
+    jr ra
 END(tlbwi_operation)
 
 LEAF(tlbp_operation)
-    
+    tlbp
+    jr ra
 END(tlbp_operation)
 
-
-
 LEAF(get_cp0_config)
-    
+    mfc0 v0, CP0_CONFIG
+    jr ra
 END(get_cp0_config)
 
 LEAF(get_cpu_id)
