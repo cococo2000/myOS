@@ -146,7 +146,7 @@ extern uint32_t initial_cp0_status;
 
 void do_scheduler(void);
 
-int do_spawn(task_info_t *);
+int do_spawn(task_info_t *, char *argv[]);
 void do_exit(void);
 void do_sleep(uint32_t);
 

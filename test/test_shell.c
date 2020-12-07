@@ -156,7 +156,7 @@ void test_shell()
 {
     char command[20];
     uint32_t argc;
-    char argv[3][10];
+    char argv[8][10];
     uint32_t i = 0;
     uint32_t j, k;
     sys_move_cursor(0, SCREEN_HEIGHT / 2);

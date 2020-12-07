@@ -203,7 +203,7 @@ void do_unblock_all(queue_t *queue)
     }
 }
 
-int do_spawn(task_info_t *task)
+int do_spawn(task_info_t *task, char *argv[])
 {
     int i = 0;
     while (i < NUM_MAX_TASK && pcb[i].status != TASK_EXITED)
@@ -211,6 +211,8 @@ int do_spawn(task_info_t *task)
         i++;
     }
     set_pcb(process_id, &pcb[i], task);
+
+    pcb[i].user_context.regs[4] = (uint64_t)argv;
     // add to ready_queue
     queue_push(&ready_queue, (void *)&pcb[i]);
     process_id++;

@@ -6,7 +6,7 @@
 
 #include "test4.h"
 
-#define RW_TIMES 3
+#define RW_TIMES 2
 
 int rand()
 {
@@ -18,7 +18,7 @@ int rand()
 int atoi(char *str)
 {
     int ret = 0;
-    int base = 16;
+    int base = 10;
     if ((str[0] == '0' && str[1] == 'x') || (str[0] == '0' && str[1] == 'X')) {
         base = 16;
         str += 2;
