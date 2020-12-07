@@ -115,7 +115,7 @@ static void init_exception()
     // TLB exception_handler_entry
     memcpy(0xffffffff80000000, TLBexception_handler_entry, (char *)TLBexception_handler_end - (char *)TLBexception_handler_begin);
     set_cp0_cause(0x00000000);
-    set_cp0_status(initial_cp0_status);
+    // set_cp0_status(initial_cp0_status);
     /* set COUNT & set COMPARE */
     /* open interrupt */
     set_cp0_count(0x00000000);
@@ -184,6 +184,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 
     init_memory();
     printk("> [INIT] Virtual memory initialization succeeded.\n");
+
     // init system call table (0_0)
     /* init system call table */
     init_syscall();

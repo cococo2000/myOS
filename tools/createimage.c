@@ -119,7 +119,7 @@ static void write_segment(Elf64_Ehdr ehdr, Elf64_Phdr phdr, FILE *fp,
     // create a buffer to hold the image
     char * file = (char *)malloc(sizeof(char) * phdr.p_filesz);
     // clear the buffer
-    memset(file, '\0', phdr.p_filesz);
+    memset(file, 0, phdr.p_filesz);
     // read the file
     fseek(fp, phdr.p_offset, SEEK_SET);
     fread(file, phdr.p_filesz, 1, fp);
@@ -128,7 +128,7 @@ static void write_segment(Elf64_Ehdr ehdr, Elf64_Phdr phdr, FILE *fp,
     fwrite(file, phdr.p_filesz, 1, img);
     // all zero string bytes
     char zero[SECTOR_SIZE];
-    memset(zero, '\0', SECTOR_SIZE);
+    memset(zero, 0, SECTOR_SIZE);
     // put zero string to the end
     fseek(img, SECTOR_SIZE * (*first) + phdr.p_filesz, SEEK_SET);
     fwrite(zero, SECTOR_SIZE - (phdr.p_filesz % SECTOR_SIZE), 1, img);
@@ -142,7 +142,7 @@ static void write_segment(Elf64_Ehdr ehdr, Elf64_Phdr phdr, FILE *fp,
 static void write_os_size(int nbytes, FILE *img)
 {
     char others[4] = {0x01, 0x00, BOOT_LOADER_SIG_1, BOOT_LOADER_SIG_2};
-    int kernel_size = (nbytes - 1) / SECTOR_SIZE;
+    int kernel_size = (nbytes - 1) / SECTOR_SIZE + 1;
     others[0] = (char)kernel_size;
     others[1] = (char)(kernel_size >> 8);
     fseek(img, BOOT_LOADER_SIG_OFFSET - OS_SIZE_LOC, SEEK_SET);

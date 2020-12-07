@@ -26,7 +26,7 @@ static int user_stack_count = 0;
 void init_stack()
 {
     uint64_t kernel_stack_top = STACK_MAX;
-    uint64_t user_stack_top = STACK_MIN;
+    uint64_t user_stack_top = STACK_MIN + STACK_SIZE;
     int i;
     for (i = 0; i < NUM_KERNEL_STACK; i++)
     {
@@ -212,7 +212,7 @@ int do_spawn(task_info_t *task, char argv[][10])
     }
     set_pcb(process_id, &pcb[i], task);
 
-    pcb[i].user_context.regs[4] = (uint64_t)argv;
+    // pcb[i].user_context.regs[4] = (uint64_t)argv;
     // add to ready_queue
     queue_push(&ready_queue, (void *)&pcb[i]);
     process_id++;
