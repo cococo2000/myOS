@@ -29,17 +29,16 @@ main : $(SRC_ARCH) $(SRC_DRIVER) $(SRC_INIT) $(SRC_INT) $(SRC_LOCK) $(SRC_IPC) $
 	$(SRC_TEST_FS) $(SRC_ARCH) $(SRC_FS) $(SRC_DRIVER) $(SRC_INIT) $(SRC_INT) $(SRC_IPC) $(SRC_SMP) $(SRC_LOCK)  $(SRC_MM) $(SRC_SCHED) $(SRC_SYSCALL) $(SRC_PROC) $(SRC_LIBS) $(SRC_TEST)     $(SRC_TEST4) -nostdlib -Wl,-m -Wl,elf64ltsmip -T  $(LD) 
 
 createimage: $(SRC_IMAGE)
-	# gcc $(SRC_IMAGE) -o createimage
+	gcc $(SRC_IMAGE) -o createimage
 
 image: bootblock main
 	./createimage --extended bootblock main
 
 clean:
-	rm -rf bootblock image main *.o 
-	# createimage
+	rm -rf bootblock image main *.o createimage
 
 floppy:
-	sudo fdisk -l /dev/sdb
+	# sudo fdisk -l /dev/sdb
 	sudo dd if=image of=/dev/sdb conv=notrunc
 	sudo dd if=image of=disk conv=notrunc
 

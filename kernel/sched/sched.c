@@ -212,7 +212,7 @@ int do_spawn(task_info_t *task, char argv[][10])
     }
     set_pcb(process_id, &pcb[i], task);
 
-    // pcb[i].user_context.regs[4] = (uint64_t)argv;
+    pcb[i].user_context.regs[4] = (uint64_t)argv;
     // add to ready_queue
     queue_push(&ready_queue, (void *)&pcb[i]);
     process_id++;
