@@ -13,15 +13,13 @@ main:
 	# (1)
 	# li $a2, 0x200
 	# (2)
-	# dla $a2, kernel_size
-	# ld $a2,0($a2)
-	# lh $a2,0($a2)
-	# dsll $a2, $a2, 9
-	# (3)
-	li $a2, 0x100
+	dla $a2, kernel_size
+	ld $a2,0($a2)
+	lh $a2,0($a2)
 	dsll $a2, $a2, 9
 	ld $t0, read_sd_card
 	# ld $ra, kernel_main
+	# jr ra
 	jal $t0
 
 	# 3) jump to kernel
