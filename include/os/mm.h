@@ -3,7 +3,8 @@
 #include "type.h"
 #include "sched.h"
 
-#define PGSIZE 4096 // 4KB
+#define PAGE_SIZE 4096 // 4KB
+#define NUM_MAX_TLB 64
 
 void init_page_table();
 void do_TLB_Refill();

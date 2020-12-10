@@ -42,6 +42,10 @@
 extern uint64_t stack_top;
 
 #define NUM_MAX_PTE 512
+#define PTE_C            2 //Cache
+#define PTE_D            1 //Dirty
+#define PTE_V            1 //Valid
+#define PTE_G            1 //Global
 
 /* used to save register infomation */
 typedef struct regs_context
@@ -81,6 +85,10 @@ typedef enum kernel_state
 } kernel_state_t;
 
 // page table entry
+// 31                               6 5  3  2   1   0 
+// +-----------------+---------------+----+---+---+---+
+// |              PFN                |  C | D | V | G |
+// +-----------------+---------------+----+---+---+---+
 typedef struct PTE
 {
     uint32_t entrylo0;
