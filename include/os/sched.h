@@ -40,6 +40,9 @@
 #define STACK_MIN 0xffffffffa0b00000
 #define STACK_SIZE 0x10000
 extern uint64_t stack_top;
+
+#define NUM_MAX_PTE 512
+
 /* used to save register infomation */
 typedef struct regs_context
 {
@@ -77,6 +80,14 @@ typedef enum kernel_state
     KERNEL_MODE,
 } kernel_state_t;
 
+// page table entry
+typedef struct PTE
+{
+    uint32_t entrylo0;
+    uint32_t entrylo1;
+} PTE_t; 
+// ? /* 128 + 28 = 156B */
+
 /* Process Control Block */
 typedef struct pcb
 {
@@ -101,7 +112,6 @@ typedef struct pcb
     queue_t * which_queue;
     /* What tasks are blocked by me, the tasks in this 
      * queue need to be unblocked when I do_exit(). */
-
     /* block related */
     queue_t wait_queue;
     /* holding lock */
@@ -120,6 +130,9 @@ typedef struct pcb
     int sleep_end_time;
 
     int count;
+
+    // page_table
+    PTE_t page_table[NUM_MAX_PTE];
 } pcb_t;
 
 /* task information, used to init PCB */

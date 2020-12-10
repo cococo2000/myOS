@@ -58,7 +58,7 @@ static void init_pcb0(){
     pcb[0].priority = 1;
     strcpy(pcb[0].name, "task0");
     pcb[0].pid = 0;
-    // pcb[0].which_queue = &ready_queue;
+    pcb[0].which_queue = &ready_queue;
     queue_init(&pcb[0].wait_queue);
     queue_init(&pcb[0].lock_queue);
     pcb[0].type = KERNEL_PROCESS;
