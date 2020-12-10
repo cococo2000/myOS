@@ -4,7 +4,7 @@
 #include "type.h"
 
 void drawing_task1(void);
-void rw_task1(char argv[][10]);
+void rw_task1(int, int, int);
 
 extern int atoi(char *str);
 

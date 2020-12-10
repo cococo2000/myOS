@@ -86,7 +86,7 @@ static void init_pcb()
     init_pcb0();
     // shell init
     int shell_pid = 1;  // = (init) process_id
-    do_spawn(&shell_task, NULL);
+    do_spawn(&shell_task);
     queue_push(&ready_queue, (void *)&pcb[shell_pid]);
     // init current_running pointer to pcb[0]
     current_running = &pcb[0];

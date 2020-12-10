@@ -285,7 +285,7 @@ LEAF(get_cp0_entrylo1)
 END(get_cp0_entrylo1)
 
 LEAF(set_cp0_entrylo1)
-    dmfc0 v0, CP0_ENTRYLO1
+    dmtc0 v0, CP0_ENTRYLO1
     jr ra
 END(set_cp0_entrylo1)
 

@@ -144,7 +144,7 @@ void execute(uint32_t argc, char argv[][10])
         int pid = atoi(argv[1]);
         if (!strcmp(argv[0], "exec")) {
             printf("exec process[%d].\n", pid);
-            sys_spawn(test_tasks[pid], NULL);
+            sys_spawn(test_tasks[pid]);
         }
         else if (!strcmp(argv[0], "kill")) {
             if (!sys_kill(pid)) {
@@ -156,10 +156,13 @@ void execute(uint32_t argc, char argv[][10])
         }
     }
     else if (argc) {
-        if (argc == 6 && !strcmp(argv[0], "exec")) {
+        if (argc == 5 && !strcmp(argv[0], "exec")) {
             int pid = atoi(argv[1]);
             printf("exec process[%d].\n", pid);
-            sys_spawn(test_tasks[pid], argv);
+            int i = sys_spawn(test_tasks[pid]);
+            pcb[i].user_context.regs[4] = atoi(argv[2]);
+            pcb[i].user_context.regs[5] = atoi(argv[3]);
+            pcb[i].user_context.regs[6] = atoi(argv[4]);
         }
         else {
             printf("Command '%s' not found!\n", argv[0]);
