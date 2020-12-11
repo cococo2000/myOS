@@ -11,13 +11,14 @@ A repository for OSLab-MIPS 2020 in UCAS.
     - [ ] A-core: Synchronization done.
 - [ ] Project 4 Virtual Memory
     - [x] S-core
-    - [ ] A-core: to do
-- [ ] Project 5 
+    - [x] A-core
+    - [ ] C-core: to do
+- [ ] Project 5 Device Driver
 - [ ] Project 6
 
 ## Report
 
-对应实验设计文档见 `/report`目录。
+实验设计文档见 `/report`目录。
 
 ## Project1 Bootloader
 
@@ -67,7 +68,7 @@ A repository for OSLab-MIPS 2020 in UCAS.
 
 
 
-## Project 5
+## Project 5 Device Driver
 
 
 
