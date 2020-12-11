@@ -37,7 +37,6 @@ void rw_task1(int x, int y, int z)
     for (i = 0; i < RW_TIMES; i++)
     {
         sys_move_cursor(1, curs + i);
-        // mem1 = atoi(argv[RW_TIMES + i + 2]);
         mem1 = test_mem[i];
         memory[i + RW_TIMES] = *(int *)mem1;
         if (memory[i + RW_TIMES] == memory[i])

@@ -127,7 +127,7 @@ int atoi(char *str)
     return ret;
 }
 
-void execute(uint32_t argc, char argv[][10])
+void execute(uint32_t argc, char argv[][LEN_ARGV])
 {
     if (argc == 1) {
         if (!strcmp(argv[0], "ps")) {
@@ -170,11 +170,11 @@ void execute(uint32_t argc, char argv[][10])
     }
 }
 
-char argv[8][20];
+char argv[MAX_ARGC][LEN_ARGV];
 
 void test_shell()
 {
-    char command[100];
+    char command[MAX_ARGC * LEN_ARGV];
     uint32_t argc;
     uint32_t i = 0;
     uint32_t j, k;

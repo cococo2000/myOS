@@ -46,6 +46,9 @@
 
 #include "sched.h"
 
+#define MAX_ARGC 10
+#define LEN_ARGV 20
+
 void test_shell(void);
 int atoi(char *str);
 extern struct task_info shell_task;
