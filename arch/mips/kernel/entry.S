@@ -138,13 +138,6 @@ END(do_scheduler)
 
 NESTED(TLBexception_handler_entry, 0, sp)
 TLBexception_handler_begin:
-    # mfc0 k0, CP0_CAUSE
-    # andi k0, k0, CAUSE_EXCCODE
-    # dla k1, exception_handler
-    # add k0 ,k0, k0
-    # add k0, k0, k1
-    # ld  k1, 0(k0)
-    # jr  k1
     dla k0, handle_tlb
     jr k0
 TLBexception_handler_end:
@@ -165,6 +158,8 @@ END(exception_handler_entry)
 
 NESTED(handle_int, 0, sp)
     SAVE_CONTEXT(USER)
+    ld  k0, current_running
+    ld  sp, OFFSET_REG29(k0)
     mfc0    a0, CP0_STATUS
     mfc0    a1, CP0_CAUSE
     jal     interrupt_helper
@@ -177,6 +172,8 @@ NESTED(handle_syscall, 0, sp)
     daddi k0, k0, 0x4
     dmtc0 k0, CP0_EPC
     SAVE_CONTEXT(USER)
+    ld  k0, current_running
+    ld  sp, OFFSET_REG29(k0)
     move a3, a2
     move a2, a1
     move a1, a0
@@ -200,7 +197,9 @@ NESTED(handle_other, 0, sp)
     daddi k0, k0, 0x4
     dmtc0 k0, CP0_EPC
     SAVE_CONTEXT(USER)
-    jal     interrupt_helper
+    ld  k0, current_running
+    ld  sp, OFFSET_REG29(k0)
+    jal interrupt_helper
     nop
     j   exception_handler_exit
 END(handle_other)

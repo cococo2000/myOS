@@ -156,6 +156,12 @@ void scheduler(void)
         // printk("current_running -> %s", current_running->name);
         // vt100_move_cursor(1, current_running->pid + 12);
         // printk("> %s\t times: %d", current_running->name, current_running->count);
+    
+        // edit entryhi.asid
+        uint64_t entryhi = get_cp0_entryhi();
+        entryhi = (entryhi & 0xffffffffffffff00) | current_running->pid;
+        set_cp0_entryhi(entryhi);
+
         // reset the cursor
         screen_cursor_x = current_running->cursor_x;
         screen_cursor_y = current_running->cursor_y;
