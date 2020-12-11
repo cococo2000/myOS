@@ -16,7 +16,8 @@ int rand()
 
 void rw_task1(int x, int y, int z)
 {
-    int mem1, mem2 = 0;
+    volatile int mem1;
+    int mem2 = 0;
     int curs = 0;
     int memory[RW_TIMES * 2];
 
