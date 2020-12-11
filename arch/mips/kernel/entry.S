@@ -138,8 +138,15 @@ END(do_scheduler)
 
 NESTED(TLBexception_handler_entry, 0, sp)
 TLBexception_handler_begin:
-    
-
+    # mfc0 k0, CP0_CAUSE
+    # andi k0, k0, CAUSE_EXCCODE
+    # dla k1, exception_handler
+    # add k0 ,k0, k0
+    # add k0, k0, k1
+    # ld  k1, 0(k0)
+    # jr  k1
+    dla k0, handle_tlb
+    jr k0
 TLBexception_handler_end:
 END(TLBexception_handler_entry)
 
@@ -180,7 +187,10 @@ NESTED(handle_syscall, 0, sp)
 END(handle_syscall)
 
 NESTED(handle_tlb, 0, sp)
-    
+    SAVE_CONTEXT(USER)
+    jal do_TLB_Refill
+    nop
+    j   exception_handler_exit
 END(handle_tlb)
 
 NESTED(handle_other, 0, sp)
@@ -294,6 +304,16 @@ LEAF(set_cp0_pagemask)
     jr ra
 END(set_cp0_pagemask)
 
+LEAF(get_cp0_context)
+    dmfc0 v0, CP0_CONTEXT
+    jr ra
+END(get_cp0_context)
+
+LEAF(get_cp0_config)
+    mfc0 v0, CP0_CONFIG
+    jr ra
+END(get_cp0_config)
+
 LEAF(tlbwr_operation)
     tlbwr
     jr ra
@@ -308,11 +328,6 @@ LEAF(tlbp_operation)
     tlbp
     jr ra
 END(tlbp_operation)
-
-LEAF(get_cp0_config)
-    mfc0 v0, CP0_CONFIG
-    jr ra
-END(get_cp0_config)
 
 LEAF(get_cpu_id)
     

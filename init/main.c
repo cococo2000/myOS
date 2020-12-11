@@ -45,7 +45,11 @@
 uint64_t stack_top = STACK_MAX;
 static void init_memory()
 {
-    init_TLB();
+    // task 1
+    // init_TLB();
+
+    // task 2
+    init_page_table();
 }
 
 static void init_pcb0(){

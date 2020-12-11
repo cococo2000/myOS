@@ -170,7 +170,7 @@ void execute(uint32_t argc, char argv[][10])
     }
 }
 
-char argv[8][10];
+char argv[8][20];
 
 void test_shell()
 {
