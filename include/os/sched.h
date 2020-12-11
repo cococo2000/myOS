@@ -36,8 +36,8 @@
 #define NUM_MAX_TASK 32
 #define CORE_NUM 2
 #define LOCK_MAX 4
-#define STACK_MAX 0xffffffffa0f00000
-#define STACK_MIN 0xffffffffa0b00000
+#define KERNEL_STACK 0xffffffffa0f00000
+#define USER_STACK 0x0
 #define STACK_SIZE 0x10000
 extern uint64_t stack_top;
 

@@ -25,13 +25,13 @@ static int user_stack_count = 0;
 
 void init_stack()
 {
-    uint64_t kernel_stack_top = STACK_MAX;
-    uint64_t user_stack_top = STACK_MIN + STACK_SIZE;
+    uint64_t kernel_stack_top = KERNEL_STACK + STACK_SIZE;
     int i;
     for (i = 0; i < NUM_KERNEL_STACK; i++)
     {
-        kernel_stack[i] = kernel_stack_top - i * STACK_SIZE;
+        kernel_stack[i] = kernel_stack_top + i * STACK_SIZE;
     }
+    uint64_t user_stack_top = USER_STACK + STACK_SIZE;
     for (i = 0; i < NUM_KERNEL_STACK; i++)
     {
         user_stack[i] = user_stack_top + i * STACK_SIZE;
