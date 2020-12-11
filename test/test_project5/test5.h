@@ -1,7 +1,7 @@
 #ifndef INCLUDE_TEST4_H_
 #define INCLUDE_TEST4_H_
 #include "queue.h"
-#define MAC_POLLING
+
 
 #define EPT_ARP 0x0608 /* type: ARP */
 
