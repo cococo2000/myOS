@@ -36,16 +36,17 @@
 #define NUM_MAX_TASK 32
 #define CORE_NUM 2
 #define LOCK_MAX 4
+
 #define KERNEL_STACK 0xffffffffa0f00000
 #define USER_STACK 0x0
-#define STACK_SIZE 0x10000
-extern uint64_t stack_top;
+#define KERNEL_STACK_SIZE 0x10000
+#define USER_STACK_SIZE 0x10000
 
 #define NUM_MAX_PTE 512
-#define PTE_C            2 //Cache
-#define PTE_D            1 //Dirty
-#define PTE_V            1 //Valid
-#define PTE_G            1 //Global
+#define PTE_C 2     // Cache
+#define PTE_D 1     // Dirty
+#define PTE_V 1     // Valid
+#define PTE_G 1     // Global
 
 /* used to save register infomation */
 typedef struct regs_context
