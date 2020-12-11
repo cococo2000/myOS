@@ -188,6 +188,8 @@ END(handle_syscall)
 
 NESTED(handle_tlb, 0, sp)
     SAVE_CONTEXT(USER)
+    ld  k0, current_running
+    ld  sp, OFFSET_REG29(k0)
     jal do_TLB_Refill
     nop
     j   exception_handler_exit
