@@ -261,6 +261,11 @@ LEAF(get_cp0_epc)
     jr ra
 END(get_cp0_epc)
 
+LEAF(get_cp0_entryhi)
+    dmfc0 v0, CP0_ENTRYHI
+    jr ra
+END(get_cp0_entryhi)
+
 LEAF(set_cp0_entryhi)
     dmtc0 a0, CP0_ENTRYHI
     jr ra
