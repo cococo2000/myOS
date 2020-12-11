@@ -27,14 +27,14 @@ void do_TLB_Refill()
     }
     else {
         // TLB invalid
-        if(!(current_running->page_table[context >> 4 & NUM_MAX_PTE].entrylo0 & 0x2) ||
-           !(current_running->page_table[context >> 4 & NUM_MAX_PTE].entrylo1 & 0x2)){
+        if(!(current_running->page_table[context >> 5 & NUM_MAX_PTE].entrylo0 & 0x2) ||
+           !(current_running->page_table[context >> 5 & NUM_MAX_PTE].entrylo1 & 0x2)){
             do_page_fault();
         }
 
     }
-    entrylo0 = current_running->page_table[context >> 4 & NUM_MAX_PTE].entrylo0;
-    entrylo1 = current_running->page_table[context >> 4 & NUM_MAX_PTE].entrylo1;
+    entrylo0 = current_running->page_table[context >> 5 & NUM_MAX_PTE].entrylo0;
+    entrylo1 = current_running->page_table[context >> 5 & NUM_MAX_PTE].entrylo1;
     set_cp0_entrylo0(entrylo0);
     set_cp0_entrylo1(entrylo1);
     tlbwi_operation();
@@ -44,9 +44,9 @@ void do_page_fault()
 {
     static uint64_t PFN  = 0x20000;
     uint64_t context = get_cp0_context();
-    current_running->page_table[context >> 4 & NUM_MAX_PTE].entrylo0 = (PFN << 6) | (PTE_C << 3) | (PTE_D << 2) | (PTE_V << 1) | PTE_G;
+    current_running->page_table[context >> 5 & NUM_MAX_PTE].entrylo0 = (PFN << 6) | (PTE_C << 3) | (PTE_D << 2) | (PTE_V << 1) | PTE_G;
     PFN ++;
-    current_running->page_table[context >> 4 & NUM_MAX_PTE].entrylo1 = (PFN << 6) | (PTE_C << 3) | (PTE_D << 2) | (PTE_V << 1) | PTE_G;
+    current_running->page_table[context >> 5 & NUM_MAX_PTE].entrylo1 = (PFN << 6) | (PTE_C << 3) | (PTE_D << 2) | (PTE_V << 1) | PTE_G;
     PFN ++;
 }
 
