@@ -49,7 +49,7 @@ static void init_memory()
     // init_TLB();
 
     // task 2
-    init_page_table();
+    // init_page_table();
 }
 
 static void init_pcb0(){

@@ -225,6 +225,8 @@ void do_exit(void)
     // free stack
     free_kernel_stack(current_running->kernel_stack_top);
     free_user_stack(current_running->user_stack_top);
+    // free memory
+    bzero(current_running->page_table, sizeof(current_running->page_table));
     // free the lock
     while (!queue_is_empty(&current_running->lock_queue))
     {
@@ -279,6 +281,8 @@ int do_kill(pid_t pid)
         // free stack
         free_kernel_stack(pcb[i].kernel_stack_top);
         free_user_stack(pcb[i].user_stack_top);
+        // free memory
+        bzero(pcb[i].page_table, sizeof(pcb[i].page_table));
         // free the lock
         while (!queue_is_empty(&pcb[i].lock_queue))
         {

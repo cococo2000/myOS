@@ -19,14 +19,14 @@ void do_TLB_Refill()
     uint32_t entrylo0, entrylo1;
     uint64_t context = get_cp0_context();
     tlbp_operation();
-    uint32_t index = get_cp0_index();
-    if (index & 0x80000000) {
+    uint32_t index = 0;
+    if (get_cp0_index() & 0x80000000) {
         // TLB refill
         set_cp0_index(index);
+        index = (index + 1) % NUM_MAX_TLB;
     }
     else {
         // TLB invalid
-        printk("tlb invalid\n");
         if(!(current_running->page_table[context >> 4 & NUM_MAX_PTE].entrylo0 & 0x2) ||
            !(current_running->page_table[context >> 4 & NUM_MAX_PTE].entrylo1 & 0x2)){
             do_page_fault();
