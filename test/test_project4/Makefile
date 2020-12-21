@@ -38,7 +38,7 @@ clean:
 	rm -rf bootblock image main *.o createimage
 
 floppy:
-	# sudo fdisk -l /dev/sdb
+	sudo fdisk -l /dev/sdb
 	sudo dd if=image of=/dev/sdb conv=notrunc
 	sudo dd if=image of=disk conv=notrunc
 
