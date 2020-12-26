@@ -19,6 +19,7 @@ SRC_TEST	= $(MAIN_DIR)/test/test.c $(MAIN_DIR)/test/test_shell.c
 SRC_TEST5	= ./test_mac.c 
 SRC_SMP 	= $(MAIN_DIR)/arch/mips/kernel/smp.c
 SRC_IMAGE	= $(MAIN_DIR)/tools/createimage.c
+SRC_MM		= $(MAIN_DIR)/mm/memory.c
 LD = $(MAIN_DIR)/ld.script
 bootblock: $(SRC_BOOT)
 	${CC} -g -G 0 -fno-pic -mno-abicalls -fno-builtin -nostdinc -mips3 -Ttext=0xffffffffa0800000 -N -o bootblock $(SRC_BOOT) -nostdlib -e main -Wl,-m -Wl,elf32ltsmip -T  $(LD) 
@@ -38,7 +39,7 @@ clean:
 	rm -rf bootblock image createimage main *.o
 
 floppy:
-	sudo fdisk -l /dev/sdb
+	# sudo fdisk -l /dev/sdb
 	sudo dd if=image of=/dev/sdb conv=notrunc
 	sudo dd if=image of=disk conv=notrunc
 

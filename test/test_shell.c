@@ -70,6 +70,7 @@ struct task_info task19 = {"mac_recv", (uint64_t)&mac_recv_task, USER_PROCESS};
 struct task_info task19 = {"fs_test", (uint64_t)&test_fs, USER_PROCESS};
 #endif
 static struct task_info *test_tasks[NUM_MAX_TASK] = {
+    // P3
     // &task1,
     // &task2,
     // &task3,
@@ -85,8 +86,12 @@ static struct task_info *test_tasks[NUM_MAX_TASK] = {
     // &task13,
     // &task14,
     // &task15,
-    &task16,
-    &task17,
+    // P4
+    // &task16,
+    // &task17,
+    // P5
+    &task18,
+    &task19,
 };
 
 char read_shell_buff()
