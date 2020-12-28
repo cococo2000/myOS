@@ -190,6 +190,8 @@ void __attribute__((section(".entry_function"))) _start(void)
     init_syscall();
     printk("> [INIT] System call initialized successfully.\n");
 
+    do_init_mac();
+
     /* init screen */
     init_screen();
     printk("> [INIT] SCREEN initialization succeeded.\n");

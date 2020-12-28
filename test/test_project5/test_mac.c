@@ -13,8 +13,8 @@
 #define MAGIC 0xbeefbeefbeefbeeflu
 #define FIFO_BUF_MAX 2048
 
-#define MAX_RECV_CNT 32
-char recv_buffer[MAX_RECV_CNT * PSIZE];
+#define MAX_RECV_CNT 64
+char recv_buffer[MAX_RECV_CNT * PSIZE * 4];
 uint64_t recv_length[MAX_RECV_CNT] = {0};
 
 const char response[] = "Response: ";
@@ -57,7 +57,7 @@ void shm_write(char *shmbuf, uint64_t *_available, char *buf, uint64_t size)
     }
 }
 
-void test_send()
+void mac_send_task()
 {
     int mode = 0;
     int size = PNUM;
@@ -83,8 +83,7 @@ void test_send()
 
     shm_read(vars->fifo_buffer, &vars->available, recv_buffer, size * sizeof(PSIZE));
     shm_read(vars->fifo_buffer, &vars->available, recv_length, size * sizeof(uint64_t));
-
-    for (int i = 0; i < size; ++i)
+    for (i = 0; i < size; ++i)
     {
         sys_move_cursor(1, print_location);
         printf("No.%d packet, recv_length[i] = %d ...\n", i, recv_length[i]);
@@ -100,13 +99,13 @@ void test_send()
     shmpagedt((void *)vars);
 #else
     uint32_t buffer[PSIZE] = {0xffffffff, 0x5500ffff, 0xf77db57d, 0x00450008, 0x0000d400, 0x11ff0040, 0xa8c073d8, 0x00e00101, 0xe914fb00, 0x0004e914, 0x0000, 0x005e0001, 0x2300fb00, 0x84b7f28b, 0x00450008, 0x0000d400, 0x11ff0040, 0xa8c073d8, 0x00e00101, 0xe914fb00, 0x0801e914, 0x0000};
-
-    for (int i = 0; i < size; ++i)
+    for (i = 0; i < size; ++i)
     {
         sys_move_cursor(1, print_location);
         printf("No.%d packet, recv_length[i] = %d ...\n", i, PSIZE);
 
-        sys_net_send(buffer, PSIZE, PNUM);
+        // sys_net_send(buffer, PSIZE, PNUM);
+        do_net_send((uint64_t)buffer, PSIZE, PNUM);
         send_num += 1;
         sys_move_cursor(1, print_location + 1);
         printf("[ECHO TASK] Echo no.%d packets ...\n", i);
@@ -115,7 +114,7 @@ void test_send()
     sys_exit();
 }
 
-void test_recv()
+void mac_recv_task()
 {
     int mode = 0;
     int size = PNUM;
@@ -146,7 +145,8 @@ void test_recv()
     sys_move_cursor(1, 1);
     printf("[ECHO TASK] start recv(%d):                    \n", size);
 
-    int ret = sys_net_recv(recv_buffer, size * PSIZE, size, recv_length);
+    // int ret = sys_net_recv(recv_buffer, size * PSIZE, size, recv_length);
+    int ret = do_net_recv((uint64_t)recv_buffer, size * PSIZE, size, (uint64_t)recv_length);
 
 #endif
     sys_exit();
