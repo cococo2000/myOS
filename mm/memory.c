@@ -19,11 +19,11 @@ void do_TLB_Refill()
     uint32_t entrylo0, entrylo1;
     uint64_t context = get_cp0_context();
     tlbp_operation();
-    uint32_t index = 0;
+    uint32_t index = NUM_MAX_TLB / 2;
     if (get_cp0_index() & 0x80000000) {
         // TLB refill
         set_cp0_index(index);
-        index = (index + 1) % NUM_MAX_TLB;
+        index = (index + 1) % (NUM_MAX_TLB / 2) + (NUM_MAX_TLB / 2);
     }
     else {
         // TLB invalid
