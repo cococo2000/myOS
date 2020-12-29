@@ -202,14 +202,17 @@ int sys_close(uint32_t fd)
 {
 }
 
-uint32_t sys_net_recv(uint64_t rd, uint64_t rd_phy, uint64_t daddr)
+uint32_t sys_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)
 {
+    return invoke_syscall(SYSCALL_NET_RECV, buf_addr, size, num);
 }
 
-void sys_net_send(uint64_t td, uint64_t td_phy)
+void sys_net_send(uint64_t buf_addr, uint64_t size, uint64_t num)
 {
+    invoke_syscall(SYSCALL_NET_SEND, buf_addr, size, num);
 }
 
 void sys_init_mac()
 {
+    invoke_syscall(SYSCALL_INIT_MAC, IGNORE, IGNORE, IGNORE);
 }

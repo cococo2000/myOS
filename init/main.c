@@ -164,6 +164,11 @@ static void init_syscall(void)
 
     syscall[SYSCALL_BARRIER_INIT       ] = (uint64_t (*)())do_barrier_init;
     syscall[SYSCALL_BARRIER_WAIT       ] = (uint64_t (*)())do_barrier_wait;
+
+    syscall[SYSCALL_WAIT_RECV_PACKAGE  ] = (uint64_t (*)())do_wait_recv_package;
+    syscall[SYSCALL_NET_RECV           ] = (uint64_t (*)())do_net_recv;
+    syscall[SYSCALL_NET_SEND           ] = (uint64_t (*)())do_net_send;
+    syscall[SYSCALL_INIT_MAC           ] = (uint64_t (*)())do_init_mac;
 }
 
 /* [0] The beginning of everything >_< */
