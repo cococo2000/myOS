@@ -3,6 +3,7 @@
 #include "sched.h"
 #include "string.h"
 #include "screen.h"
+#include "mac.h"
 /* exception handler */
 uint64_t exception_handler[32];
 
@@ -24,8 +25,21 @@ static void irq_timer()
     /* reset timer register */
     reset_timer(TIMER_INTERVAL);
 
-    uint32_t temp_x;
-    uint32_t temp_y;
+    // check mac wake up
+    static uint32_t num_package = 0;
+    if (num_package == PNUM) {
+        num_package = 0;
+    }
+    while (!(0x80000000 & rx_descriptor[num_package % PNUM].tdes0) && num_package < PNUM) {
+        recv_flag[num_package] = 1;
+        if (!queue_is_empty(&recv_block_queue)) {
+            queue_push(&ready_queue, queue_dequeue(&recv_block_queue));
+        }
+        num_package++;
+    }
+
+    // uint32_t temp_x;
+    // uint32_t temp_y;
 
     // if(count > 100 && count % 8){
     //     temp_x = screen_cursor_x;
