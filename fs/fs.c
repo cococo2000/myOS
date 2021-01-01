@@ -22,12 +22,12 @@ int readdir(char *name)
 
 int mkdir(char *name)
 {
-     return 0;
+    return 0;
 }
 
 int rmdir(char *name)
 {
-     return 0;
+    return 0;
 }
 
  
@@ -44,7 +44,7 @@ int mknod(char *name)
 
 int open(char *name, uint32_t access)
 {
-     
+    
     return -1; // open failure
 }
 
@@ -56,13 +56,13 @@ int write(uint32_t fd, char *buff, uint32_t size)
 
 int read(uint32_t fd, char *buff, uint32_t size)
 {
-     
+    
     return 0;
 }
 
 int close(uint32_t fd)
 {
-     
+    
     return 0;
 }
 

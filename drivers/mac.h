@@ -11,6 +11,14 @@
 #define PSIZE (32)
 #define PNUM (10)
 
+// DMA recv description
+#define DMA_RX_BASE_ADDR (0xffffffffa2000000)
+// DMA send description
+#define DMA_TX_BASE_ADDR (0xffffffffa2001000)
+
+#define SEND_BUF_BASE_ADDR (0xffffffffa2002000)
+#define RECV_BUF_BASE_ADDR (0xffffffffa2004000)
+
 #define SIZE_SHM (4096)
 /* DMA Normal interrupt */
 #define DMA_INTR_ENA_NIE 0x00010000 /* Normal Summary */
