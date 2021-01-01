@@ -33,7 +33,7 @@ int rmdir(char *name)
  
 void read_super_block()
 {
-     
+    
 }
 
 int mknod(char *name)
@@ -69,7 +69,7 @@ int close(uint32_t fd)
  
 int cat(char *name)
 {
-     
+    
     return -1; // open failure
 }
 
