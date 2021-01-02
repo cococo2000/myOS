@@ -60,27 +60,27 @@ void read_inode(uint32_t id)
 {
     uint32_t sector = id / (SECTOR_SIZE / sizeof(inode_entry_t));
     uint32_t part = id % (SECTOR_SIZE / sizeof(inode_entry_t));
-    sd_card_read((char*)BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
-    memcpy(&inode_buffer, BUFFER + part * sizeof(inode_entry_t), sizeof(inode_entry_t));
+    sd_card_read((void *)BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
+    memcpy((uint8_t *)&inode_buffer, (uint8_t *)(BUFFER + part * sizeof(inode_entry_t)), sizeof(inode_entry_t));
 }
 
 void write_inode(uint32_t id)
 {
     uint32_t sector = id / (SECTOR_SIZE / sizeof(inode_entry_t));
     uint32_t part = id % (SECTOR_SIZE / sizeof(inode_entry_t));
-    sd_card_read(BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
-    memcpy(BUFFER + part * sizeof(inode_entry_t), &inode_buffer, sizeof(inode_entry_t));
-    sd_card_write(BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
+    sd_card_read((void *)BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
+    memcpy((uint8_t *)(BUFFER + part * sizeof(inode_entry_t)), (uint8_t *)&inode_buffer, sizeof(inode_entry_t));
+    sd_card_write((void *)BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
 }
 
 void read_block(uint32_t id)
 {
-    sd_card_read(BUFFER, OFFSET_FS + id * BLOCK_SIZE, BLOCK_SIZE);
+    sd_card_read((void *)BUFFER, OFFSET_FS + id * BLOCK_SIZE, BLOCK_SIZE);
 }
 
 void write_block(uint32_t id)
 {
-    sd_card_write(BUFFER, OFFSET_FS + id * BLOCK_SIZE, BLOCK_SIZE);
+    sd_card_write((void *)BUFFER, OFFSET_FS + id * BLOCK_SIZE, BLOCK_SIZE);
 }
 
 uint32_t alloc_inode()
@@ -263,6 +263,9 @@ void init_dir_block(uint32_t block, uint16_t father, uint16_t self)
 void init_rootdir()
 {
     uint32_t self = alloc_inode();
+    if (self != 0) {
+        kprintf("[ERROR] ROOT DIR INODE NUMBER = %d, NOT ZERO\n", self);
+    }
     uint32_t block = alloc_block();
     init_inode(block, self, self, O_RDWR, TYPE_ROOT);
     init_dir_block(block, self, self);
