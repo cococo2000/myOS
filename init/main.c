@@ -36,6 +36,7 @@
 #include "mm.h"
 #include "mac.h"
 #include "time.h"
+#include "fs.h"
 
 #define TASK_INIT (00)
 
@@ -195,7 +196,8 @@ void __attribute__((section(".entry_function"))) _start(void)
     /* init screen */
     init_screen();
     printk("> [INIT] SCREEN initialization succeeded.\n");
-
+    
+    init_fs();
     /* init filesystem */
     // read_super_block();
 

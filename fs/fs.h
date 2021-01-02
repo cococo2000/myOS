@@ -115,7 +115,7 @@ typedef struct fd
     // uint32_t indirect_3_ptr;
 } fd_t;
 
-extern inode_entry_t current_dir_entry;
+// extern inode_entry_t current_dir_entry;
 
 void init_fs();
  

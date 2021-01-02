@@ -28,8 +28,8 @@
 
 // #define P3_TEST
 // #define P4_TEST
-#define P5_TEST
-// #define P6_TEST
+// #define P5_TEST
+#define P6_TEST
 
 #ifdef P3_TEST
 #include "test3.h"
