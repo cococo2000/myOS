@@ -408,12 +408,13 @@ static void mac_send_desc_init(mac_t *mac)
     uint32_t IC = 0;
     uint32_t LS = 1, FS = 1;
     uint32_t DC = 1, CIC = 0;
+    int num_desc = (mac->pnum > NUM_DMA_DESC) ? NUM_DMA_DESC : mac->pnum;
     int i;
     for (i = 0; i < mac->pnum && i < NUM_DMA_DESC; i++) {
-        tx_descriptor[i].tdes0 = OWN << 31 | IC << 30 | LS << 29 | FS << 28 | DC << 27 | CIC << 26 | (i == mac->pnum - 1) << 21 | 1 << 20;
+        tx_descriptor[i].tdes0 = OWN << 31 | IC << 30 | LS << 29 | FS << 28 | DC << 27 | CIC << 26 | (i == num_desc - 1) << 21 | 1 << 20;
         tx_descriptor[i].tdes1 = mac->psize;
         tx_descriptor[i].tdes2 = mac->saddr_phy;
-        tx_descriptor[i].tdes3 = mac->td_phy + (((i + 1) % mac->pnum) * sizeof(desc_t));
+        tx_descriptor[i].tdes3 = mac->td_phy + (((i + 1) % num_desc) * sizeof(desc_t));
     }
 }
 
