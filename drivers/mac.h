@@ -9,7 +9,7 @@
 #define GMAC_BASE_ADDR (0xffffffffc0040000)
 #define DMA_BASE_ADDR (0xffffffffc0041000)
 #define PSIZE (32)
-#define PNUM (10)
+#define PNUM (64)
 
 // DMA recv description
 #define DMA_RX_BASE_ADDR (0xffffffffa2000000)
