@@ -37,12 +37,13 @@ image: bootblock main
 	./createimage --extended bootblock main
 
 clean:
-	rm -rf bootblock image createimage main *.o
+	rm -rf bootblock image createimage main *.o disk
 
 floppy:
 	# sudo fdisk -l /dev/sdb
 	sudo dd if=image of=/dev/sdb conv=notrunc
 	sudo dd if=image of=disk conv=notrunc
+	sudo truncate --size=1G disk
 
 asm:
 	mips64el-linux-objdump -d main > kernel.txt

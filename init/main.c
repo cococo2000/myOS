@@ -197,7 +197,10 @@ void __attribute__((section(".entry_function"))) _start(void)
     init_screen();
     printk("> [INIT] SCREEN initialization succeeded.\n");
     
+    /* init file system */
     init_fs();
+    printk("> [INIT] FS initialization succeeded.\n");
+
     /* init filesystem */
     // read_super_block();
 

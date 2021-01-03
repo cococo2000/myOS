@@ -33,7 +33,7 @@
 #define ENTRY_SECTOR 8
 
 #define MAX_DIRECT_NUM 10
-#define MAX_NAME_LENGTH 29
+#define MAX_NAME_LENGTH 20
 
 #define NUM_BLOCK (FS_SIZE / BLOCK_SIZE)
 #define NUM_INODE 32 * 1024
