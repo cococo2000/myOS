@@ -104,8 +104,8 @@ void mac_send_task()
         sys_move_cursor(1, print_location);
         printf("No.%d packet, recv_length[i] = %d ...\n", i, PSIZE);
 
-        // sys_net_send(buffer, PSIZE, PNUM);
-        do_net_send((uint64_t)buffer, PSIZE, PNUM);
+        sys_net_send(buffer, PSIZE, PNUM);
+        // do_net_send((uint64_t)buffer, PSIZE, PNUM);
         send_num += 1;
         sys_move_cursor(1, print_location + 1);
         printf("[ECHO TASK] Echo no.%d packets ...\n", i);
@@ -145,8 +145,8 @@ void mac_recv_task()
     sys_move_cursor(1, 1);
     printf("[ECHO TASK] start recv(%d):                    \n", size);
 
-    // int ret = sys_net_recv(recv_buffer, size * PSIZE, size, recv_length);
-    int ret = do_net_recv((uint64_t)recv_buffer, size * PSIZE, size, (uint64_t)recv_length);
+    int ret = sys_net_recv(recv_buffer, size * PSIZE, size);//, recv_length);
+    // int ret = do_net_recv((uint64_t)recv_buffer, size * PSIZE, size, (uint64_t)recv_length);
 
 #endif
     sys_exit();
