@@ -447,7 +447,7 @@ void reg_write_32(uint64_t addr, uint32_t data);
 void irq_enable(int IRQn);
 void print_rx_dscrb(mac_t *mac);
 void print_tx_dscrb(mac_t *mac);
-uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num, uint64_t length);
+uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num);//, uint64_t length);
 // uint32_t do_net_recv(mac_t *mac);
 void do_net_send(uint64_t buf_addr, uint64_t size, uint64_t num);
 // void do_net_send(mac_t *mac);

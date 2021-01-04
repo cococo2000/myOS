@@ -51,12 +51,12 @@ void do_page_fault()
 
 void init_TLB(void)
 {
-    int i = 0;
+    int i;
     uint64_t VPN2 = 0;
     uint64_t PFN  = 0x20000;
 
     set_cp0_pagemask(0);
-    for (i = 0; i < NUM_MAX_TLB; i++) {
+    for (i = 32; i < NUM_MAX_TLB; i++) {
         set_cp0_entryhi(VPN2 << 13);
         VPN2 += 1;
         set_cp0_entrylo0((PFN << 6) | (PTE_C << 3) | (PTE_D << 2) | (PTE_V << 1) | PTE_G);

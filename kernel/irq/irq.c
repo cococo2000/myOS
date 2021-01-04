@@ -3,11 +3,15 @@
 #include "sched.h"
 #include "string.h"
 #include "screen.h"
+#include "mac.h"
+
 /* exception handler */
 uint64_t exception_handler[32];
 
 /* used to init PCB */
-uint32_t initial_cp0_status = 0x10008003;
+// uint32_t initial_cp0_status = 0x10008003;
+// enable mac interrupt
+uint32_t initial_cp0_status = 0x10009003;
 
 // extern void do_shell();
 
@@ -26,6 +30,19 @@ static void irq_timer()
 
     uint32_t temp_x;
     uint32_t temp_y;
+
+    // check mac wake up
+    // static uint32_t num_package = 0;
+    // if (num_package == PNUM) {
+    //     num_package = 0;
+    // }
+    // while (!(0x80000000 & rx_descriptor[num_package % PNUM].tdes0) && num_package < PNUM) {
+    //     recv_flag[num_package] = 1;
+    //     if (!queue_is_empty(&recv_block_queue)) {
+    //         queue_push(&ready_queue, queue_dequeue(&recv_block_queue));
+    //     }
+    //     num_package++;
+    // }
 
     // if(count > 100 && count % 8){
     //     temp_x = screen_cursor_x;
@@ -56,6 +73,25 @@ static void irq_timer()
     // count++;
 }
 
+void register_irq_handler(int bit_field, uint64_t irq_handler)
+{
+    // volatile uint32_t * Inten_0     = (void *)0xffffffffbfe11424;
+    volatile uint32_t * Intenset_0  = (void *)0xffffffffbfe11428;
+    volatile uint32_t * Intenclr_0  = (void *)0xffffffffbfe1142c;
+    volatile uint32_t * Intpol_0    = (void *)0xffffffffbfe11430;
+    volatile uint32_t * Intedge_0   = (void *)0xffffffffbfe11434;
+    volatile uint32_t * Intbounce_0 = (void *)0xffffffffbfe11438;
+    volatile uint32_t * Intauto_0   = (void *)0xffffffffbfe1143c;
+    uint32_t set_bit_field_1  = 1 << bit_field;
+    uint32_t set_bit_field_0  = ~set_bit_field_1;
+    *Intenclr_0  = (*Intenclr_0 ) | set_bit_field_1 ;
+    *Intenset_0  = (*Intenset_0 ) | set_bit_field_1 ;
+    *Intedge_0   = (*Intedge_0  ) | set_bit_field_1 ;
+    *Intauto_0   = (*Intauto_0  ) & set_bit_field_0;
+    *Intpol_0    = (*Intpol_0   ) & set_bit_field_0;
+    *Intbounce_0 = (*Intbounce_0) & set_bit_field_0;
+}
+
 void other_exception_handler()
 {
     time_elapsed += 1000000;
@@ -69,9 +105,13 @@ void interrupt_helper(uint32_t status, uint32_t cause)
 {
     current_running->mode = KERNEL_MODE;
     uint32_t interrupt = status & cause & 0x0000ff00; // status_IM[7:0] & cause_IP[7:0]
-    if(interrupt & 0x00008000){
+    if (interrupt & 0x00008000) {
         irq_timer();
-    }else{
+    }
+    else if (interrupt & 0x00001000) {
+        mac_irq_handle();
+    }
+    else {
         other_exception_handler();
     }
     current_running->mode = USER_MODE;

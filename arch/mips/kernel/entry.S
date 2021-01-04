@@ -310,6 +310,11 @@ LEAF(set_cp0_pagemask)
     jr ra
 END(set_cp0_pagemask)
 
+LEAF(set_cp0_wired)
+    mtc0 a0, CP0_WIRED
+    jr ra
+END(set_cp0_wired)
+
 LEAF(get_cp0_context)
     dmfc0 v0, CP0_CONTEXT
     jr ra

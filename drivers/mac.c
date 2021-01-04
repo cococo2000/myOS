@@ -12,9 +12,13 @@ uint32_t mac_cnt = 0;
 // desc_t rx_descriptor[NUM_DMA_DESC];
 desc_t * rx_descriptor = (desc_t *)DMA_RX_BASE_ADDR;
 desc_t * tx_descriptor = (desc_t *)DMA_TX_BASE_ADDR;
+uint64_t buf_length[NUM_DMA_DESC] = {0};
 
 // char send_buf[NUM_DMA_DESC * PSIZE * 4];
 // char recv_buf[NUM_DMA_DESC * PSIZE * 4];
+char * send_buffer = (char *)SEND_BUF_BASE_ADDR;
+char * recv_buffer = (char *)RECV_BUF_BASE_ADDR;
+
 
 uint32_t reg_read_32(uint64_t addr)
 {
@@ -291,30 +295,6 @@ static uint32_t printf_recv_buffer(uint64_t recv_buffer)
     return flag;
 }
 
-/**
- * Clears all the pending interrupts.
- * If the Dma status register is read then all the interrupts gets cleared
- * @param[in] pointer to synopGMACdevice.
- * \return returns void.
- */
-void clear_interrupt()
-{
-    uint32_t data;
-    data = reg_read_32(DMA_BASE_ADDR + DmaStatus);
-    reg_write_32(DMA_BASE_ADDR + DmaStatus, data & 0x1ffff);
-}
-void mac_irq_handle(void)
-{
-}
-
-void irq_enable(int IRQn)
-{
-}
-
-void mac_recv_handle(mac_t *test_mac)
-{
-}
-
 static uint32_t printk_recv_buffer(uint64_t recv_buffer)
 {
     uint32_t i, flag, n;
@@ -340,6 +320,84 @@ static uint32_t printk_recv_buffer(uint64_t recv_buffer)
     return flag;
 }
 
+static uint32_t kprintf_recv_buffer(uint64_t recv_buffer)
+{
+    uint32_t i, flag, n;
+    flag = 0;
+    n = 0;
+    for (i = 0; i < PSIZE * PNUM; i++)
+    {
+        if ((*((uint32_t *)recv_buffer + i) != 0) && (*((uint32_t *)recv_buffer + i) != 0xf0f0f0f0) && (*((uint32_t *)recv_buffer + i) != 0xf0f0f0f))
+        {
+            if (*((uint32_t *)recv_buffer + i) != 0xffffff)
+            {
+                kprintf(" %x ", *((uint32_t *)recv_buffer + i));
+
+                if (n % 10 == 0 && n != 0)
+                {
+                    kprintf(" \n");
+                }
+                n++;
+                flag = 1;
+            }
+        }
+    }
+    return flag;
+}
+
+/**
+ * Clears all the pending interrupts.
+ * If the Dma status register is read then all the interrupts gets cleared
+ * @param[in] pointer to synopGMACdevice.
+ * \return returns void.
+ */
+void clear_interrupt()
+{
+    uint32_t data;
+    data = reg_read_32(DMA_BASE_ADDR + DmaStatus);
+    reg_write_32(DMA_BASE_ADDR + DmaStatus, data & 0x1ffff);
+}
+
+void mac_irq_handle(void)
+{
+    volatile uint32_t * intenset_0 = (void *)0xffffffffbfe11428;
+    volatile uint32_t * intenclr_0 = (void *)0xffffffffbfe1142c;
+    static uint32_t num_package = 0;
+    if (num_package == PNUM) {
+        num_package = 0;
+    }
+    while (!(0x80000000 & rx_descriptor[num_package % NUM_DMA_DESC].tdes0) && num_package < PNUM){
+        recv_flag[num_package] = 1;
+        if (!queue_is_empty(&recv_block_queue)) {
+            queue_push(&ready_queue, queue_dequeue(&recv_block_queue));
+        }
+        num_package++;
+    }
+    *intenclr_0 = (*intenclr_0) | (1 << 12);
+    *intenset_0 = (*intenset_0) | (1 << 12);
+    clear_interrupt();
+}
+
+void irq_enable(int IRQn)
+{
+    if (IRQn >= 0 && IRQn < 8) {
+        set_cp0_status(get_cp0_status() | (1 << (8 + IRQn)));
+    }
+}
+
+void mac_recv_handle(mac_t *test_mac)
+{
+    int i, j;
+    do_wait_recv_package();
+    for(i = 0; i < test_mac->pnum; i++){
+        j = (i + 1) * PSIZE * 4;
+        while(!recv_buffer[--j] && j >= i * PSIZE * 4);
+        buf_length[i] = j - i * PSIZE * 4 + 1;
+    }
+    i--;
+    kprintf("the last rx_descriptor[%d].tdes0=0x%x\n", i, rx_descriptor[i].tdes0);
+}
+
 void set_sram_ctr()
 {
     *((volatile uint32_t *)0xffffffffbfe10420) = 1; /* 使能GMAC0 DMA一致性 */
@@ -359,7 +417,7 @@ static void mac_recv_desc_init(mac_t *mac)
     mac->rd_phy = DMA_RX_BASE_ADDR & 0x1fffffff;
     uint32_t OWN = 0;
     uint32_t LS = 1, FS = 1;
-    uint32_t DIC = 1;
+    uint32_t DIC = 0;
     int num_desc = (mac->pnum > NUM_DMA_DESC) ? NUM_DMA_DESC : mac->pnum;
     int i;
     for(i = 0; i < num_desc; i++) {
@@ -387,6 +445,7 @@ void dma_control_init(mac_t *mac, uint32_t init_value)
     reg_write_32(mac->dma_addr + DmaControl, init_value);
     return;
 }
+
 void set_mac_addr(mac_t *mac, uint8_t *MacAddr)
 {
     uint32_t data;
@@ -405,7 +464,7 @@ static void mac_send_desc_init(mac_t *mac)
     mac->td = DMA_TX_BASE_ADDR;
     mac->td_phy = DMA_TX_BASE_ADDR & 0x1fffffff;
     uint32_t OWN = 0;
-    uint32_t IC = 0;
+    uint32_t IC = 1;
     uint32_t LS = 1, FS = 1;
     uint32_t DC = 1, CIC = 0;
     int num_desc = (mac->pnum > NUM_DMA_DESC) ? NUM_DMA_DESC : mac->pnum;
@@ -421,7 +480,7 @@ static void mac_send_desc_init(mac_t *mac)
 /* buf_addr is the total recv buffer's address; size means the total size of recv buffer;
 the total recv buffer may have some little recv buffer;
 num means recv buffer's num ;length is each small recv buffer's size*/
-uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num, uint64_t length)
+uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)//, uint64_t length)
 {
 
     mac_t mac;
@@ -453,13 +512,14 @@ uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num, uint64_t le
         rx_descriptor[i].tdes0 |= OWN << 31;
         reg_write_32(DMA_BASE_ADDR + DmaRxPollDemand, 0x00000001);
     }
-    for (i = 0; i < mac.pnum; i++) {
-        while(0x80000000 & rx_descriptor[i].tdes0);
-    }
-    i--;
-    printf("the last rx_descriptor[%d].tdes0 = 0x%x\n", i, rx_descriptor[i].tdes0);
-    memcpy(buf_addr, RECV_BUF_BASE_ADDR, size * 4);
-    printf_recv_buffer(buf_addr);
+    mac_recv_handle(&mac);
+    // for (i = 0; i < mac.pnum; i++) {
+    //     while(0x80000000 & rx_descriptor[i].tdes0);
+    // }
+    // i--;
+    // printf("the last rx_descriptor[%d].tdes0 = 0x%x\n", i, rx_descriptor[i].tdes0);
+    // memcpy(buf_addr, RECV_BUF_BASE_ADDR, size * 4);
+    kprintf_recv_buffer(RECV_BUF_BASE_ADDR);
     return 0;
 }
 
@@ -497,16 +557,18 @@ void do_net_send(uint64_t buf_addr, uint64_t size, uint64_t num)
         tx_descriptor[i].tdes0 |= OWN << 31;
         reg_write_32(DMA_BASE_ADDR + DmaTxPollDemand, 0x00000001);
     }
-    // for (i = 0; i < mac.pnum; i++) {
-    //     while(0x80000000 & tx_descriptor[i].tdes0);
-    // }
+    // TODO
+    for (i = 0; i < mac.pnum; i++) {
+        while(0x80000000 & tx_descriptor[i].tdes0);
+    }
 }
 void set_mac_int()
 {
     volatile uint8_t *entry_gmac0;
     entry_gmac0 = 0xffffffff1fe1140c | 0xa0000000;
-    *entry_gmac0 = 0x41; //0 core ip6 int2
+    *entry_gmac0 = 0x41; // 0 core ip6 Int4
 }
+
 void do_init_mac(void)
 {
     mac_t test_mac;
@@ -524,12 +586,18 @@ void do_init_mac(void)
                     //   s_reset(&test_mac); //will interrupt
     disable_interrupt_all(&test_mac);
     // set_mac_addr(&test_mac, mac_addr);
-    // register_irq_handler(12, mac_irq_handle);
+    register_irq_handler(12, mac_irq_handle);
     reg_write_32(GMAC_BASE_ADDR + 0X3C, 1);
     set_mac_int();
 }
 
 void do_wait_recv_package(void)
 {
-    do_block(&recv_block_queue);
+    int i;
+    bzero(recv_flag, PNUM * sizeof(uint32_t));
+    for(i = 0; i < PNUM; i++){
+        if(recv_flag[i] == 0){
+            do_block(&recv_block_queue);
+        }
+    }
 }

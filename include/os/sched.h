@@ -40,7 +40,7 @@
 #define KERNEL_STACK 0xffffffffa0f00000
 #define USER_STACK 0x0
 #define KERNEL_STACK_SIZE 0x10000
-#define USER_STACK_SIZE 0x10000
+#define USER_STACK_SIZE 0x8000
 
 #define NUM_MAX_PTE 512
 #define PTE_C 2     // Cache
