@@ -91,7 +91,6 @@ void register_irq_handler(int bit_field, uint64_t irq_handler)
     *Intbounce_0 = (*Intbounce_0) & set_bit_field_0;
 }
 
-
 void other_exception_handler()
 {
     time_elapsed += 1000000;

@@ -405,7 +405,7 @@ void disable_interrupt_all(mac_t *mac)
 
 static void mac_recv_desc_init(mac_t *mac)
 {
-    uint32_t OWN = 1;
+    uint32_t OWN = 0;
     uint32_t LS = 1, FS = 1;
     uint32_t DIC = 0;
     int i;
@@ -448,7 +448,7 @@ void set_mac_addr(mac_t *mac, uint8_t *MacAddr)
 
 static void mac_send_desc_init(mac_t *mac)
 {
-    uint32_t OWN = 1;
+    uint32_t OWN = 0;
     uint32_t IC = 1;
     uint32_t LS = 1, FS = 1;
     uint32_t DC = 1, CIC = 0;
@@ -499,7 +499,7 @@ uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)//, uint64_t
     int i;
     int OWN = 1;
     for (i = 0; i < mac.pnum; i++) {
-        // rx_descriptor[i].tdes0 |= OWN << 31;
+        rx_descriptor[i].tdes0 |= OWN << 31;
         reg_write_32(DMA_BASE_ADDR + DmaRxPollDemand, 0x00000001);
     }
     mac_recv_handle(&mac);
@@ -549,7 +549,7 @@ void do_net_send(uint64_t buf_addr, uint64_t size, uint64_t num)
     int i;
     int OWN = 1;
     for (i = 0; i < mac.pnum; i++) {
-        // tx_descriptor[i].tdes0 |= OWN << 31;
+        tx_descriptor[i].tdes0 |= OWN << 31;
         reg_write_32(DMA_BASE_ADDR + DmaTxPollDemand, 0x00000001);
     }
     for (i = 0; i < mac.pnum; i++) {
@@ -588,8 +588,8 @@ void do_wait_recv_package(void)
 {
     int i;
     bzero(recv_flag, 4 * PNUM);
-    for(i = 0; i < PNUM; i++){
-        if(recv_flag[i] == 0){
+    for (i = 0; i < PNUM; i++) {
+        if (recv_flag[i] == 0) {
             do_block(&recv_block_queue);
         }
     }
