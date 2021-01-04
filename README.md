@@ -15,7 +15,7 @@ A repository for OSLab-MIPS 2020 in UCAS.
     - [ ] C-core: to do
 - [ ] Project 5 Device Driver
     - [x] S-core
-    - [ ] A-core
+    - [x] A-core
 - [ ] Project 6 File System
     - [ ] S-core
     - [ ] A-core
@@ -76,5 +76,5 @@ A repository for OSLab-MIPS 2020 in UCAS.
 
 
 
-## Project 6
+## Project 6 File System
 

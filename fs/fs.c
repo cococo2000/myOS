@@ -24,18 +24,19 @@ static uint8_t inodebmp_buffer[INODE_BITMAP_SIZE];
 // static uint8_t inode_buffer[BLOCK_SIZE];
 static inode_entry_t inode_buffer;
 static super_block_t *superblock = (super_block_t *)superblock_buffer;
+// static super_block_t *superblock = (super_block_t *)0xffffffffaf000000;
 
 static fd_t fds[NUM_FD];
 static inode_entry_t current_dir_entry;
 
 void read_superblock()
 {
-    sd_card_read(superblock_buffer, OFFSET_FS, SECTOR_SIZE);
+    sd_card_read(superblock, OFFSET_FS, SECTOR_SIZE);
 }
 
 void write_superblock()
 {
-    sd_card_write(superblock_buffer, OFFSET_FS, SECTOR_SIZE);
+    sd_card_write(superblock, OFFSET_FS, SECTOR_SIZE);
 }
 
 void read_blockbmp()
@@ -188,7 +189,7 @@ void init_blockbmp()
     for (i = 0; i < INIT_USED_BLOCK / 8; i++) {
         blockbmp_buffer[i] = 0xff;
     }
-    for (j = 0; j < INIT_USED_BLOCK % 8; i++) {
+    for (j = 0; j < INIT_USED_BLOCK % 8; j++) {
         blockbmp_buffer[i] |= (0x01 << j);
     }
     write_blockbmp();
@@ -274,7 +275,7 @@ void init_rootdir()
 {
     uint32_t self = alloc_inode();
     if (self != 0) {
-        kprintf("[ERROR] ROOT DIR INODE NUMBER = %d, NOT ZERO\n", self);
+        kprintf("[ERROR] ROOT DIR INODE NUMBER = %d, NOT ZERO\n\r", self);
     }
     uint32_t block = alloc_block();
     init_inode(block, self, self, O_RDWR, TYPE_ROOT);
@@ -288,16 +289,16 @@ void print_superblock()
     int temp_y = screen_cursor_y;
     // do_clear();
     vt100_move_cursor(1, 3);
-    printk("[FS] File system current informatin:      \n");
-    printk("     magic number : 0x%x, start sector : 0x%x\n", superblock->magic, superblock->start_sector);
-    printk("     file system size : 0x%x, block size : 0x%x\n", superblock->fs_size, superblock->block_size);
-    printk("     block bitmap offset : 0x%x           \n", superblock->block_bmp_offset);
-    printk("     inode bitmap offset : 0x%x           \n", superblock->inode_bmp_offset);
-    printk("     inode offset : 0x%x                  \n", superblock->inode_offset);
-    printk("     data offset : 0x%x                   \n", superblock->data_offset);
-    printk("     total inodes : %d, free inodes : %d  \n", superblock->total_inode_num, superblock->free_inode_num);
-    printk("     total blocks : %d, free blocks : %d  \n", superblock->total_block_num, superblock->free_block_num);
-    printk("     inode entry size : %d, dir entry size : %d\n", superblock->inode_size, superblock->dir_size);
+    printk("[FS] File system current informatin:      \n\r");
+    printk("     magic number : 0x%x, start sector : 0x%x\n\r", superblock->magic, superblock->start_sector);
+    printk("     file system size : 0x%x, block size : 0x%x\n\r", superblock->fs_size, superblock->block_size);
+    printk("     block bitmap offset : 0x%x           \n\r", superblock->block_bmp_offset);
+    printk("     inode bitmap offset : 0x%x           \n\r", superblock->inode_bmp_offset);
+    printk("     inode offset : 0x%x                  \n\r", superblock->inode_offset);
+    printk("     data offset : 0x%x                   \n\r", superblock->data_offset);
+    printk("     total inodes : %d, free inodes : %d  \n\r", superblock->total_inode_num, superblock->free_inode_num);
+    printk("     total blocks : %d, free blocks : %d  \n\r", superblock->total_block_num, superblock->free_block_num);
+    printk("     inode entry size : %d, dir entry size : %d\n\r", superblock->inode_size, superblock->dir_size);
     screen_cursor_x = temp_x;
     screen_cursor_y = temp_y;
 }
@@ -356,38 +357,43 @@ int cat(char *name)
 
 void do_mkfs()
 {
-    int i;
-    kprintf("[FS] Starting initialize file system!     \n");
+    int temp_x = screen_cursor_x;
+    int temp_y = screen_cursor_y;
+    // do_clear();
+    vt100_move_cursor(1, 3);
+    printk("[FS] Starting initialize file system!     \n\r");
     bzero(fds, NUM_FD * sizeof(fd_t));
     // bzero(inode_buffer, BLOCK_SIZE);
     // bzero(data_block_buffer, BLOCK_SIZE);
     // bzero(dir_entry_block_buffer, BLOCK_SIZE);
 
     // init superblock
-    kprintf("[FS] Setting superblock...                \n");
+    printk("[FS] Setting superblock...                \n\r");
     init_superblock();
 
     // init block bitmap
-    kprintf("[FS] Setting block bitmap...              \n");
+    printk("[FS] Setting block bitmap...              \n\r");
     init_blockbmp();
 
     // init inode bitmap
-    kprintf("[FS] Setting inode bitmap...              \n");
+    printk("[FS] Setting inode bitmap...              \n\r");
     init_inodebmp();
 
     // init root directory
-    kprintf("[FS] Setting root dir...                  \n");
+    printk("[FS] Setting root dir...                  \n\r");
     init_rootdir();
 
-    kprintf("[FS] Initializing file system finished!   \n");
+    printk("[FS] Initializing file system finished!   \n\r");
     print_superblock();
+    screen_cursor_x = temp_x;
+    screen_cursor_y = temp_y;
 }
 
 void do_statfs()
 {
     read_superblock();
     if(superblock->magic != KFS_MAGIC){
-        kprintf("[ERROR] No File System!\n");
+        kprintf("[ERROR] No File System!\n\r");
         return;
     }
     print_superblock();
@@ -397,12 +403,11 @@ void init_fs()
 {
     read_superblock();
     if (superblock->magic == KFS_MAGIC) {
-        // sync_from_disk_inode(0, root_inode_ptr);
-        // memcpy((uint8_t *)&current_dir_entry, (uint8_t *)&root_inode, sizeof(inode_entry_t));
-        printk("[FS] File system has existed in disk!      \n");
+        printk("[FS] File system has existed in disk!      \n\r");
         do_statfs();
     }
     else {
+        printk("[FS] No File system!       \n\r");
         do_mkfs();
     }
 }
