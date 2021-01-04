@@ -176,7 +176,7 @@ static void init_syscall(void)
 /* [0] The beginning of everything >_< */
 void __attribute__((section(".entry_function"))) _start(void)
 {
-    asm_start();
+    // asm_start();
 
     /* init Process Control Block */
     /* init stack space */

@@ -7,3 +7,4 @@ kernel.txt
 *.o
 .vscode
 pktRxTx
+zero
