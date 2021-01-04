@@ -509,7 +509,7 @@ uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)//, uint64_t
     // i--;
     // printf("the last rx_descriptor[%d].tdes0 = 0x%x\n", i, rx_descriptor[i].tdes0);
     memcpy(buf_addr, &recv_buf, size * 4);
-    kprintf_recv_buffer(buf_addr);
+    // kprintf_recv_buffer(buf_addr);
     return 0;
 }
 
@@ -556,6 +556,7 @@ void do_net_send(uint64_t buf_addr, uint64_t size, uint64_t num)
         while(0x80000000 & tx_descriptor[i].tdes0);
     }
 }
+
 void set_mac_int()
 {
     volatile uint8_t *entry_gmac0;

@@ -14,7 +14,8 @@
 #define FIFO_BUF_MAX 2048
 
 #define MAX_RECV_CNT 64
-char recv_buffer[MAX_RECV_CNT * PSIZE * 4];
+char recv_buffer1[MAX_RECV_CNT * PSIZE * 4];
+char recv_buffer2[MAX_RECV_CNT * PSIZE * 4];
 uint64_t recv_length[MAX_RECV_CNT] = {0};
 
 const char response[] = "Response: ";
@@ -55,6 +56,31 @@ void shm_write(char *shmbuf, uint64_t *_available, char *buf, uint64_t size)
 
         _available = 1;
     }
+}
+
+static uint32_t printf_recv_buffer(uint64_t recv_buffer)
+{
+    uint32_t i, flag, n;
+    flag = 0;
+    n = 0;
+    for (i = 0; i < PSIZE * PNUM; i++)
+    {
+        if ((*((uint32_t *)recv_buffer + i) != 0) && (*((uint32_t *)recv_buffer + i) != 0xf0f0f0f0) && (*((uint32_t *)recv_buffer + i) != 0xf0f0f0f))
+        {
+            if (*((uint32_t *)recv_buffer + i) != 0xffffff)
+            {
+                printf(" %x ", *((uint32_t *)recv_buffer + i));
+
+                if (n % 10 == 0 && n != 0)
+                {
+                    printf(" \n");
+                }
+                n++;
+                flag = 1;
+            }
+        }
+    }
+    return flag;
 }
 
 void mac_send_task()
@@ -143,10 +169,13 @@ void mac_recv_task()
     shmdt((void *)vars);
 #else
     sys_move_cursor(1, 1);
-    printf("[ECHO TASK] start recv(%d):                    \n", size);
+    printf("[ECHO TASK] start recv(%d):                    \n", size * 2);
 
-    int ret = sys_net_recv(recv_buffer, size * PSIZE, size);//, recv_length);
+    int ret = sys_net_recv(recv_buffer1, size * PSIZE, size);//, recv_length);
+    ret = sys_net_recv(recv_buffer2, size * PSIZE, size);//, recv_length);
     // int ret = do_net_recv((uint64_t)recv_buffer, size * PSIZE, size, (uint64_t)recv_length);
+    printf_recv_buffer(recv_buffer1);
+    printf_recv_buffer(recv_buffer2);
 
 #endif
     sys_exit();
