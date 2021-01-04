@@ -52,7 +52,7 @@
 #define O_WRONLY 2
 #define O_RDWR   3
 
-#define BUFFER 0xffffffffa800000
+#define BUFFER 0xffffffffa8000000
 
 // offset is sector offset
 typedef struct super_block

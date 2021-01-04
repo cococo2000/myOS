@@ -182,30 +182,30 @@ void __attribute__((section(".entry_function"))) _start(void)
     /* init stack space */
     init_stack();
     init_pcb();
-    printk("> [INIT] Stack heap initialization succeeded.\n");
-    printk("> [INIT] PCB initialization succeeded.\n");
+    printk("> [INIT] Stack heap initialization succeeded.\n\r");
+    printk("> [INIT] PCB initialization succeeded.\n\r");
 
     /* init interrupt */
     init_exception();
-    printk("> [INIT] Interrupt processing initialization succeeded.\n");
+    printk("> [INIT] Interrupt processing initialization succeeded.\n\r");
 
     init_memory();
-    printk("> [INIT] Virtual memory initialization succeeded.\n");
+    printk("> [INIT] Virtual memory initialization succeeded.\n\r");
 
     // init system call table (0_0)
     /* init system call table */
     init_syscall();
-    printk("> [INIT] System call initialized successfully.\n");
+    printk("> [INIT] System call initialized successfully.\n\r");
 
     do_init_mac();
 
     /* init screen */
     init_screen();
-    printk("> [INIT] SCREEN initialization succeeded.\n");
+    printk("> [INIT] SCREEN initialization succeeded.\n\r");
     
     /* init file system */
-    // init_fs();
-    // printk("> [INIT] FS initialization succeeded.\n");
+    init_fs();
+    printk("> [INIT] FS initialization succeeded.\n\r");
 
     /* init filesystem */
     // read_super_block();
