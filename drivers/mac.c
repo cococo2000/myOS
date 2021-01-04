@@ -2,23 +2,17 @@
 #include "irq.h"
 #include "sched.h"
 
-#define NUM_DMA_DESC 64
 queue_t recv_block_queue;
 uint32_t recv_flag[PNUM] = {0};
 uint32_t ch_flag = 0;
 uint32_t mac_cnt = 0;
 
-// desc_t tx_descriptor[NUM_DMA_DESC];
-// desc_t rx_descriptor[NUM_DMA_DESC];
-desc_t * rx_descriptor = (desc_t *)DMA_RX_BASE_ADDR;
-desc_t * tx_descriptor = (desc_t *)DMA_TX_BASE_ADDR;
+desc_t tx_descriptor[NUM_DMA_DESC];
+desc_t rx_descriptor[NUM_DMA_DESC];
+
+char send_buf[NUM_DMA_DESC * PSIZE * 4];
+char recv_buf[NUM_DMA_DESC * PSIZE * 4];
 uint64_t buf_length[NUM_DMA_DESC] = {0};
-
-// char send_buf[NUM_DMA_DESC * PSIZE * 4];
-// char recv_buf[NUM_DMA_DESC * PSIZE * 4];
-char * send_buffer = (char *)SEND_BUF_BASE_ADDR;
-char * recv_buffer = (char *)RECV_BUF_BASE_ADDR;
-
 
 uint32_t reg_read_32(uint64_t addr)
 {
@@ -295,31 +289,6 @@ static uint32_t printf_recv_buffer(uint64_t recv_buffer)
     return flag;
 }
 
-static uint32_t printk_recv_buffer(uint64_t recv_buffer)
-{
-    uint32_t i, flag, n;
-    flag = 0;
-    n = 0;
-    for (i = 0; i < PSIZE; i++)
-    {
-        if ((*((uint32_t *)recv_buffer + i) != 0) && (*((uint32_t *)recv_buffer + i) != 0xf0f0f0f0) && (*((uint32_t *)recv_buffer + i) != 0xf0f0f0f))
-        {
-            if (*((uint32_t *)recv_buffer + i) != 0xffffff)
-            {
-                printk(" %x ", *((uint32_t *)recv_buffer + i));
-
-                if (n % 10 == 0 && n != 0)
-                {
-                    printk(" \n");
-                }
-                n++;
-                flag = 1;
-            }
-        }
-    }
-    return flag;
-}
-
 static uint32_t kprintf_recv_buffer(uint64_t recv_buffer)
 {
     uint32_t i, flag, n;
@@ -336,6 +305,31 @@ static uint32_t kprintf_recv_buffer(uint64_t recv_buffer)
                 if (n % 10 == 0 && n != 0)
                 {
                     kprintf(" \n");
+                }
+                n++;
+                flag = 1;
+            }
+        }
+    }
+    return flag;
+}
+
+static uint32_t printk_recv_buffer(uint64_t recv_buffer)
+{
+    uint32_t i, flag, n;
+    flag = 0;
+    n = 0;
+    for (i = 0; i < PSIZE * PNUM; i++)
+    {
+        if ((*((uint32_t *)recv_buffer + i) != 0) && (*((uint32_t *)recv_buffer + i) != 0xf0f0f0f0) && (*((uint32_t *)recv_buffer + i) != 0xf0f0f0f))
+        {
+            if (*((uint32_t *)recv_buffer + i) != 0xffffff)
+            {
+                printk(" %x ", *((uint32_t *)recv_buffer + i));
+
+                if (n % 10 == 0 && n != 0)
+                {
+                    printk(" \n");
                 }
                 n++;
                 flag = 1;
@@ -385,13 +379,13 @@ void irq_enable(int IRQn)
     }
 }
 
-void mac_recv_handle(mac_t *test_mac)
+void mac_recv_handle(mac_t *mac)
 {
     int i, j;
     do_wait_recv_package();
-    for(i = 0; i < test_mac->pnum; i++){
+    for(i = 0; i < mac->pnum; i++){
         j = (i + 1) * PSIZE * 4;
-        while(!recv_buffer[--j] && j >= i * PSIZE * 4);
+        while(!recv_buf[--j] && j >= i * PSIZE * 4);
         buf_length[i] = j - i * PSIZE * 4 + 1;
     }
     i--;
@@ -411,15 +405,11 @@ void disable_interrupt_all(mac_t *mac)
 
 static void mac_recv_desc_init(mac_t *mac)
 {
-    mac->daddr = RECV_BUF_BASE_ADDR;
-    mac->daddr_phy = RECV_BUF_BASE_ADDR & 0x1fffffff;
-    mac->rd = DMA_RX_BASE_ADDR;
-    mac->rd_phy = DMA_RX_BASE_ADDR & 0x1fffffff;
-    uint32_t OWN = 0;
+    uint32_t OWN = 1;
     uint32_t LS = 1, FS = 1;
     uint32_t DIC = 0;
-    int num_desc = (mac->pnum > NUM_DMA_DESC) ? NUM_DMA_DESC : mac->pnum;
     int i;
+    int num_desc = (mac->pnum > NUM_DMA_DESC) ? NUM_DMA_DESC : mac->pnum;
     for(i = 0; i < num_desc; i++) {
         rx_descriptor[i].tdes0 = OWN << 31 | FS << 9 | LS << 8 | 0;
         rx_descriptor[i].tdes1 = DIC << 31 | (i == num_desc - 1) << 15 | 1 << 14 | mac->psize;
@@ -445,7 +435,6 @@ void dma_control_init(mac_t *mac, uint32_t init_value)
     reg_write_32(mac->dma_addr + DmaControl, init_value);
     return;
 }
-
 void set_mac_addr(mac_t *mac, uint8_t *MacAddr)
 {
     uint32_t data;
@@ -459,20 +448,16 @@ void set_mac_addr(mac_t *mac, uint8_t *MacAddr)
 
 static void mac_send_desc_init(mac_t *mac)
 {
-    mac->saddr = SEND_BUF_BASE_ADDR;
-    mac->saddr_phy = SEND_BUF_BASE_ADDR & 0x1fffffff;
-    mac->td = DMA_TX_BASE_ADDR;
-    mac->td_phy = DMA_TX_BASE_ADDR & 0x1fffffff;
-    uint32_t OWN = 0;
+    uint32_t OWN = 1;
     uint32_t IC = 1;
     uint32_t LS = 1, FS = 1;
     uint32_t DC = 1, CIC = 0;
-    int num_desc = (mac->pnum > NUM_DMA_DESC) ? NUM_DMA_DESC : mac->pnum;
     int i;
-    for (i = 0; i < mac->pnum && i < NUM_DMA_DESC; i++) {
+    int num_desc = (mac->pnum > NUM_DMA_DESC) ? NUM_DMA_DESC : mac->pnum;
+    for (i = 0; i < num_desc; i++) {
         tx_descriptor[i].tdes0 = OWN << 31 | IC << 30 | LS << 29 | FS << 28 | DC << 27 | CIC << 26 | (i == num_desc - 1) << 21 | 1 << 20;
         tx_descriptor[i].tdes1 = mac->psize;
-        tx_descriptor[i].tdes2 = mac->saddr_phy;
+        tx_descriptor[i].tdes2 = mac->saddr_phy;// + i * mac->psize;
         tx_descriptor[i].tdes3 = mac->td_phy + (((i + 1) % num_desc) * sizeof(desc_t));
     }
 }
@@ -491,6 +476,10 @@ uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)//, uint64_t
     mac.psize = PSIZE * 4; // 128bytes
     mac.pnum = num;       // pnum
     // mac.daddr = buf_addr;
+    mac.daddr = (uint64_t)&recv_buf;
+    mac.daddr_phy = (uint64_t)(&recv_buf) & 0x1fffffff;
+    mac.rd = (uint64_t)&rx_descriptor;
+    mac.rd_phy = (uint64_t)(&rx_descriptor) & 0x1fffffff;
 
     mac_recv_desc_init(&mac);
     dma_control_init(&mac, DmaStoreAndForward | DmaTxSecondFrame | DmaRxThreshCtrl128);
@@ -506,10 +495,11 @@ uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)//, uint64_t
     reg_write_32(DMA_BASE_ADDR + 0x1c, DMA_INTR_DEFAULT_MASK);
 
     /*  YOU NEED ADD RECV CODE*/
+    // do_wait_recv_package();
     int i;
     int OWN = 1;
     for (i = 0; i < mac.pnum; i++) {
-        rx_descriptor[i].tdes0 |= OWN << 31;
+        // rx_descriptor[i].tdes0 |= OWN << 31;
         reg_write_32(DMA_BASE_ADDR + DmaRxPollDemand, 0x00000001);
     }
     mac_recv_handle(&mac);
@@ -518,8 +508,8 @@ uint32_t do_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)//, uint64_t
     // }
     // i--;
     // printf("the last rx_descriptor[%d].tdes0 = 0x%x\n", i, rx_descriptor[i].tdes0);
-    // memcpy(buf_addr, RECV_BUF_BASE_ADDR, size * 4);
-    kprintf_recv_buffer(RECV_BUF_BASE_ADDR);
+    memcpy(buf_addr, &recv_buf, size * 4);
+    kprintf_recv_buffer(buf_addr);
     return 0;
 }
 
@@ -532,11 +522,15 @@ void do_net_send(uint64_t buf_addr, uint64_t size, uint64_t num)
     mac.mac_addr = GMAC_BASE_ADDR;
     mac.dma_addr = DMA_BASE_ADDR;
 
-    memcpy(SEND_BUF_BASE_ADDR, buf_addr, num * size * 4); 
+    memcpy(&send_buf, buf_addr, size * 4); 
 
-    mac.psize = PSIZE * 4;
+    mac.psize = size * 4;
     mac.pnum = num;
     // td_phy = mac.td_phy;
+    mac.saddr = (uint64_t)&send_buf;
+    mac.saddr_phy = (uint64_t)(&send_buf) & 0x1fffffff;
+    mac.td = (uint64_t)&tx_descriptor;
+    mac.td_phy = (uint64_t)(&tx_descriptor) & 0x1fffffff;
 
     mac_send_desc_init(&mac);
     dma_control_init(&mac, DmaStoreAndForward | DmaTxSecondFrame | DmaRxThreshCtrl128);
@@ -545,6 +539,7 @@ void do_net_send(uint64_t buf_addr, uint64_t size, uint64_t num)
     mii_dul_force(&mac);
 
     reg_write_32(GMAC_BASE_ADDR, (1 << 8) | 0x8);                    // enable MAC-TX
+    // reg_write_32(GMAC_BASE_ADDR, reg_read_32(GMAC_BASE_ADDR) | 0x8);                    // enable MAC-TX
     reg_write_32(DMA_BASE_ADDR + DmaTxBaseAddr, (uint32_t)mac.td_phy);
     reg_write_32(DMA_BASE_ADDR + 0x18, reg_read_32(DMA_BASE_ADDR + 0x18) | 0x02202000); //0x02202002); // start tx, rx
     reg_write_32(DMA_BASE_ADDR + 0x1c, 0x10001 | (1 << 6));
@@ -554,10 +549,9 @@ void do_net_send(uint64_t buf_addr, uint64_t size, uint64_t num)
     int i;
     int OWN = 1;
     for (i = 0; i < mac.pnum; i++) {
-        tx_descriptor[i].tdes0 |= OWN << 31;
+        // tx_descriptor[i].tdes0 |= OWN << 31;
         reg_write_32(DMA_BASE_ADDR + DmaTxPollDemand, 0x00000001);
     }
-    // TODO
     for (i = 0; i < mac.pnum; i++) {
         while(0x80000000 & tx_descriptor[i].tdes0);
     }
@@ -566,9 +560,8 @@ void set_mac_int()
 {
     volatile uint8_t *entry_gmac0;
     entry_gmac0 = 0xffffffff1fe1140c | 0xa0000000;
-    *entry_gmac0 = 0x41; // 0 core ip6 Int4
+    *entry_gmac0 = 0x41; //0 core ip6 int4
 }
-
 void do_init_mac(void)
 {
     mac_t test_mac;
@@ -594,7 +587,7 @@ void do_init_mac(void)
 void do_wait_recv_package(void)
 {
     int i;
-    bzero(recv_flag, PNUM * sizeof(uint32_t));
+    bzero(recv_flag, 4 * PNUM);
     for(i = 0; i < PNUM; i++){
         if(recv_flag[i] == 0){
             do_block(&recv_block_queue);

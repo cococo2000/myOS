@@ -10,14 +10,7 @@
 #define DMA_BASE_ADDR (0xffffffffc0041000)
 #define PSIZE (32)
 #define PNUM (64)
-
-// DMA recv description
-#define DMA_RX_BASE_ADDR (0xffffffffa2000000)
-// DMA send description
-#define DMA_TX_BASE_ADDR (0xffffffffa2001000)
-
-#define SEND_BUF_BASE_ADDR (0xffffffffa2002000)
-#define RECV_BUF_BASE_ADDR (0xffffffffa2004000)
+#define NUM_DMA_DESC 64
 
 #define SIZE_SHM (4096)
 /* DMA Normal interrupt */
@@ -51,6 +44,7 @@
 extern queue_t recv_block_queue;
 extern uint32_t recv_flag[PNUM];
 extern uint32_t ch_flag;
+
 /*
 enum GmacRegisters
 {
@@ -441,6 +435,10 @@ typedef struct mac
     uint64_t rd_phy;
 
 } mac_t;
+
+extern desc_t tx_descriptor[NUM_DMA_DESC];
+extern desc_t rx_descriptor[NUM_DMA_DESC];
+
 void set_mac_int();
 uint32_t read_register(uint64_t base, uint64_t offset);
 void reg_write_32(uint64_t addr, uint32_t data);

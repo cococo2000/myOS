@@ -206,7 +206,7 @@ int sys_close(uint32_t fd)
 uint32_t sys_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)
 {
     invoke_syscall(SYSCALL_NET_RECV, buf_addr, size, num);
-    memcpy(buf_addr, RECV_BUF_BASE_ADDR, size * 4);
+    // memcpy(buf_addr, RECV_BUF_BASE_ADDR, size * 4);
     return 0;
 }
 

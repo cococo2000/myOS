@@ -4,7 +4,6 @@
 #include "string.h"
 #include "screen.h"
 #include "mac.h"
-
 /* exception handler */
 uint64_t exception_handler[32];
 
@@ -28,10 +27,7 @@ static void irq_timer()
     /* reset timer register */
     reset_timer(TIMER_INTERVAL);
 
-    uint32_t temp_x;
-    uint32_t temp_y;
-
-    // check mac wake up
+    // check mac wake up?
     // static uint32_t num_package = 0;
     // if (num_package == PNUM) {
     //     num_package = 0;
@@ -43,6 +39,9 @@ static void irq_timer()
     //     }
     //     num_package++;
     // }
+
+    // uint32_t temp_x;
+    // uint32_t temp_y;
 
     // if(count > 100 && count % 8){
     //     temp_x = screen_cursor_x;
@@ -84,13 +83,14 @@ void register_irq_handler(int bit_field, uint64_t irq_handler)
     volatile uint32_t * Intauto_0   = (void *)0xffffffffbfe1143c;
     uint32_t set_bit_field_1  = 1 << bit_field;
     uint32_t set_bit_field_0  = ~set_bit_field_1;
-    *Intenclr_0  = (*Intenclr_0 ) | set_bit_field_1 ;
-    *Intenset_0  = (*Intenset_0 ) | set_bit_field_1 ;
-    *Intedge_0   = (*Intedge_0  ) | set_bit_field_1 ;
+    *Intenclr_0  = (*Intenclr_0 ) | set_bit_field_1;
+    *Intenset_0  = (*Intenset_0 ) | set_bit_field_1;
+    *Intedge_0   = (*Intedge_0  ) | set_bit_field_1;
     *Intauto_0   = (*Intauto_0  ) & set_bit_field_0;
     *Intpol_0    = (*Intpol_0   ) & set_bit_field_0;
     *Intbounce_0 = (*Intbounce_0) & set_bit_field_0;
 }
+
 
 void other_exception_handler()
 {
