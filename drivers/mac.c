@@ -406,7 +406,7 @@ void disable_interrupt_all(mac_t *mac)
 static void mac_recv_desc_init(mac_t *mac)
 {
     uint32_t OWN = 0;
-    uint32_t LS = 1, FS = 1;
+    uint32_t FS = 1, LS = 1;
     uint32_t DIC = 0;
     int i;
     int num_desc = (mac->pnum > NUM_DMA_DESC) ? NUM_DMA_DESC : mac->pnum;
