@@ -31,12 +31,12 @@
 #include "sched.h"
 #include "screen.h"
 #include "common.h"
-#include "syscall.h"
 #include "smp.h"
 #include "mm.h"
 #include "mac.h"
 #include "time.h"
 #include "fs.h"
+#include "syscall.h"
 
 #define TASK_INIT (00)
 
