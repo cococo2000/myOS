@@ -144,8 +144,14 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
         if (!strcmp(argv[0], "ps")) {
             sys_process_show();
         }
-        else if (!strcmp(argv[0], "clear")){
+        else if (!strcmp(argv[0], "clear")) {
             sys_screen_clear();
+        }
+        else if (!strcmp(argv[0], "mkfs")) {
+            sys_mkfs();
+        }
+        else if (!strcmp(argv[0], "statfs")) {
+            sys_print_fs();
         }
         else {
             printf("Command '%s' not found!\n", argv[0]);
