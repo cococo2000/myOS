@@ -42,10 +42,10 @@ clean:
 floppy:
 	# sudo dd if=/dev/zero of=zero bs=1M count=2048
 	# sudo dd if=/dev/zero of=/dev/sdb conv=notrunc
-	# sudo fdisk -l /dev/sdb
+	sudo fdisk -l /dev/sdb
 	sudo dd if=image of=/dev/sdb conv=notrunc
 	sudo dd if=image of=disk conv=notrunc
-	sudo truncate --size=1G disk
+	sudo truncate --size=1536M disk
 
 asm:
 	mips64el-linux-objdump -d main > kernel.txt

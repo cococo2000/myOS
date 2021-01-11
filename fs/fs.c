@@ -36,6 +36,7 @@ void read_superblock()
 
 void write_superblock()
 {
+    // printk("sd_card_write\n");
     sd_card_write(superblock, OFFSET_FS, SECTOR_SIZE);
 }
 
@@ -179,6 +180,7 @@ void init_superblock()
     superblock->free_block_num = NUM_BLOCK - INIT_USED_BLOCK;
     superblock->inode_size = sizeof(inode_entry_t);
     superblock->dir_size = sizeof(dir_entry_t);
+    printk("write_superblock\n");
     write_superblock();
 }
 

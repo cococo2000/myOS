@@ -83,4 +83,5 @@ void sd_card_write(void *dest, uint32_t offset, uint32_t size)
 {
 	// printk("write:0x%x, size:%d\n", offset, size);
 	sdwrite((char *)dest, offset, size);
+	// printk("sdwrite done\n");
 }
