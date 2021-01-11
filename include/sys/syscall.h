@@ -72,7 +72,8 @@
 #define SYSCALL_BARRIER_INIT 40
 #define SYSCALL_BARRIER_WAIT 41
 
-#define SYSCALL_FS_INIT 50
+// #define SYSCALL_FS_INIT 50
+#define SYSCALL_FS_MKFS 50
 #define SYSCALL_FS_MKDIR 51
 #define SYSCALL_FS_RMDIR 52
 #define SYSCALL_FS_READDIR 53
@@ -130,17 +131,16 @@ void barrier_wait(barrier_t *);
 
 void sys_mkfs();
 int sys_mkdir(char *);
+int sys_rmdir(char *);
 int sys_readdir(char *);
 int sys_enterdir(char *);
-int sys_rmdir(char *);
 int sys_print_fs();
 int sys_mknod(char *);
-
 int sys_fopen(char *, uint32_t);
+int sys_cat(char *);
 int sys_fwrite(uint32_t, char *, uint32_t);
 int sys_fread(uint32_t, char *, uint32_t);
 int sys_close(uint32_t);
-int sys_cat(char *);
 
 uint32_t sys_get_timer();
 void sys_yield();

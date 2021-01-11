@@ -171,6 +171,19 @@ static void init_syscall(void)
     syscall[SYSCALL_NET_RECV           ] = (uint64_t (*)())do_net_recv;
     syscall[SYSCALL_NET_SEND           ] = (uint64_t (*)())do_net_send;
     syscall[SYSCALL_INIT_MAC           ] = (uint64_t (*)())do_init_mac;
+
+    syscall[SYSCALL_FS_MKFS            ] = (uint64_t (*)())do_mkfs;
+    syscall[SYSCALL_FS_MKDIR           ] = (uint64_t (*)())do_mkdir;
+    syscall[SYSCALL_FS_RMDIR           ] = (uint64_t (*)())do_rmdir;
+    syscall[SYSCALL_FS_READDIR         ] = (uint64_t (*)())do_readdir;
+    syscall[SYSCALL_FS_ENTERDIR        ] = (uint64_t (*)())do_enterdir;
+    syscall[SYSCALL_FS_PRINT           ] = (uint64_t (*)())do_statfs;
+    syscall[SYSCALL_FS_MKNOD           ] = (uint64_t (*)())do_mknod;
+    syscall[SYSCALL_FS_OPEN            ] = (uint64_t (*)())do_open;
+    syscall[SYSCALL_FS_WRITE           ] = (uint64_t (*)())do_write;
+    syscall[SYSCALL_FS_CAT             ] = (uint64_t (*)())do_cat;
+    syscall[SYSCALL_FS_READ            ] = (uint64_t (*)())do_read;
+    syscall[SYSCALL_FS_CLOSE           ] = (uint64_t (*)())do_close;
 }
 
 /* [0] The beginning of everything >_< */

@@ -118,19 +118,18 @@ typedef struct fd
 // extern inode_entry_t current_dir_entry;
 
 void init_fs();
- 
-void read_superblock();
 
- 
-int readdir(char *name);
-int mkdir(char *name);
-int rmdir(char *name);
-int mknod(char *name);
-
-int open(char *name, uint32_t access);
-int write(uint32_t fd, char *buff, uint32_t size);
-int read(uint32_t fd, char *buff, uint32_t size);
-int close(uint32_t fd);
-int cat(char *name);
+void do_mkfs();
+int do_mkdir(char *name);
+int do_rmdir(char *name);
+int do_readdir(char *name);
+int do_enterdir(char *name);
+void do_statfs();
+int do_mknod(char *name);
+int do_open(char *name, uint32_t access);
+int do_cat(char *name);
+int do_write(uint32_t fd, char *buff, uint32_t size);
+int do_read(uint32_t fd, char *buff, uint32_t size);
+int do_close(uint32_t fd);
 
 #endif

@@ -303,53 +303,58 @@ void print_superblock()
     screen_cursor_y = temp_y;
 }
 
-int readdir(char *name)
+int do_enterdir(char *name)
+{
+
+}
+
+int do_readdir(char *name)
 {
     return 0;
 }
 
-int mkdir(char *name)
+int do_mkdir(char *name)
 {
     return 0;
 }
 
-int rmdir(char *name)
+int do_rmdir(char *name)
 {
     return 0;
 }
 
-int mknod(char *name)
+int do_mknod(char *name)
 {
     
     return 0; // failure
 }
 
-int open(char *name, uint32_t access)
+int do_open(char *name, uint32_t access)
 {
     
     return -1; // open failure
 }
 
-int write(uint32_t fd, char *buff, uint32_t size)
+int do_write(uint32_t fd, char *buff, uint32_t size)
 {
     
     return 0;
 }
 
-int read(uint32_t fd, char *buff, uint32_t size)
+int do_read(uint32_t fd, char *buff, uint32_t size)
 {
     
     return 0;
 }
 
-int close(uint32_t fd)
+int do_close(uint32_t fd)
 {
     
     return 0;
 }
 
  
-int cat(char *name)
+int do_cat(char *name)
 {
     
     return -1; // open failure

@@ -155,54 +155,6 @@ char sys_read_shell_buff()
     return invoke_syscall(SYSCALL_READ_SHELL_BUFF, IGNORE, IGNORE, IGNORE);
 }
 
-void sys_mkfs()
-{
-}
-
-int sys_mkdir(char *name)
-{
-}
-
-int sys_readdir(char *name)
-{
-}
-
-int sys_enterdir(char *name)
-{
-}
-
-int sys_rmdir(char *name)
-{
-}
-
-int sys_print_fs(char *name)
-{
-}
-
-int sys_mknod(char *name)
-{
-}
-
-int sys_fopen(char *name, uint32_t access)
-{
-}
-
-int sys_fwrite(uint32_t fd, char *buff, uint32_t size)
-{
-}
-
-int sys_cat(char *name)
-{
-}
-
-int sys_fread(uint32_t fd, char *buff, uint32_t size)
-{
-}
-
-int sys_close(uint32_t fd)
-{
-}
-
 uint32_t sys_net_recv(uint64_t buf_addr, uint64_t size, uint64_t num)
 {
     return invoke_syscall(SYSCALL_NET_RECV, buf_addr, size, num);
@@ -216,4 +168,65 @@ void sys_net_send(uint64_t buf_addr, uint64_t size, uint64_t num)
 void sys_init_mac()
 {
     invoke_syscall(SYSCALL_INIT_MAC, IGNORE, IGNORE, IGNORE);
+}
+
+void sys_mkfs()
+{
+    return invoke_syscall(SYSCALL_FS_MKFS, IGNORE, IGNORE, IGNORE);
+}
+
+int sys_mkdir(char *name)
+{
+    return invoke_syscall(SYSCALL_FS_MKDIR, (uint64_t)name, IGNORE, IGNORE);
+}
+
+int sys_readdir(char *name)
+{
+    return invoke_syscall(SYSCALL_FS_READDIR, (uint64_t)name, IGNORE, IGNORE);
+}
+
+int sys_enterdir(char *name)
+{
+    return invoke_syscall(SYSCALL_FS_ENTERDIR, (uint64_t)name, IGNORE, IGNORE);
+}
+
+int sys_rmdir(char *name)
+{
+    return invoke_syscall(SYSCALL_FS_ENTERDIR, (uint64_t)name, IGNORE, IGNORE);
+}
+
+// int sys_print_fs(char *name)
+int sys_print_fs()
+{
+    return invoke_syscall(SYSCALL_FS_PRINT, IGNORE, IGNORE, IGNORE);
+}
+
+int sys_mknod(char *name)
+{
+    return invoke_syscall(SYSCALL_FS_MKNOD, (uint64_t)name, IGNORE, IGNORE);
+}
+
+int sys_fopen(char *name, uint32_t access)
+{
+    return invoke_syscall(SYSCALL_FS_OPEN, (uint64_t)name, (uint64_t)access, IGNORE);
+}
+
+int sys_cat(char *name)
+{
+    return invoke_syscall(SYSCALL_FS_CAT, (uint64_t)name, IGNORE, IGNORE);
+}
+
+int sys_fwrite(uint32_t fd, char *buff, uint32_t size)
+{
+    return invoke_syscall(SYSCALL_FS_WRITE, (uint64_t)fd, (uint64_t)buff, (uint64_t)size);
+}
+
+int sys_fread(uint32_t fd, char *buff, uint32_t size)
+{
+    return invoke_syscall(SYSCALL_FS_READ, (uint64_t)fd, (uint64_t)buff, (uint64_t)size);
+}
+
+int sys_close(uint32_t fd)
+{
+    return invoke_syscall(SYSCALL_FS_CLOSE, (uint64_t)fd, IGNORE, IGNORE);
 }
