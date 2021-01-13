@@ -216,6 +216,7 @@ void init_inode(uint32_t block, uint32_t father, uint32_t self, uint32_t mode, u
         inode_buffer.fsize = 0;
     }
     inode_buffer.fnum = 0;
+    inode_buffer.timestamp = get_timer();
     inode_buffer.direct_table[0] = block;
     int i;
     for (i = 1; i < MAX_DIRECT_NUM; i++) {
@@ -227,29 +228,29 @@ void init_inode(uint32_t block, uint32_t father, uint32_t self, uint32_t mode, u
 
     write_inode(inode_buffer.id);
 
-    if (inode_buffer.type != TYPE_ROOT) {
-        read_inode(father);
-        uint32_t fnum = ++(inode_buffer.fnum);
-        write_inode(father);
+    // if (inode_buffer.type != TYPE_ROOT) {
+    //     read_inode(father);
+    //     uint32_t fnum = ++(inode_buffer.fnum);
+    //     write_inode(father);
         
-        uint32_t block = inode_buffer.direct_table[0];
-        read_block(block);
-        dir_entry_t* dir;
-        int i;
-        for (i = 0; i < fnum; i++) {
-            dir = (dir_entry_t*)(BUFFER + i * sizeof(dir_entry_t));
-            if (dir->name[0] == '\0') break;
-        }
-        // while (inst_path[0][j] != '\0') {
-        //     dir->name[j] = inst_path[0][j];
-        //     j++;
-        // }
-        dir->name[i] = '\0';
-        dir->id = self;
-        dir->type = type;
+    //     uint32_t block = inode_buffer.direct_table[0];
+    //     read_block(block);
+    //     dir_entry_t* dir;
+    //     int i;
+    //     for (i = 0; i < fnum; i++) {
+    //         dir = (dir_entry_t*)(BUFFER + i * sizeof(dir_entry_t));
+    //         if (dir->name[0] == '\0') break;
+    //     }
+    //     // while (inst_path[0][j] != '\0') {
+    //     //     dir->name[j] = inst_path[0][j];
+    //     //     j++;
+    //     // }
+    //     dir->name[i] = '\0';
+    //     dir->id = self;
+    //     dir->type = type;
 
-        write_block(block);
-    }
+    //     write_block(block);
+    // }
 }
 
 // init directory block
@@ -263,12 +264,14 @@ void init_dir_block(uint32_t block, uint16_t father, uint16_t self)
     dir->name[2] = '\0';
     dir->id = father;
     dir->type = TYPE_FATHER;
+    dir->mode = O_RDWR;
     
     dir = (dir_entry_t *)(BUFFER + sizeof(dir_entry_t));
     dir->name[0] = '.';
     dir->name[1] = '\0';
     dir->id = self;
     dir->type = TYPE_SELF;
+    dir->mode = O_RDWR;
     
     write_block(block);
 }
@@ -317,6 +320,29 @@ int do_readdir(char *name)
 
 int do_mkdir(char *name)
 {
+    // TODO: check name
+    kprintf("Creating dir: %s", name);
+
+    uint32_t id = alloc_inode();
+    uint32_t block = alloc_block();
+    init_inode(block, current_dir_entry.id, id, O_RDWR, TYPE_DIR);
+    init_dir_block(block, current_dir_entry.id, id);
+
+    // modify current dir block
+    read_block(current_dir_entry.direct_table[0]);  // TODO: more dir
+    dir_entry_t * dir = (dir_entry_t *)(BUFFER + (current_dir_entry.fnum + 2) * sizeof(dir_entry_t));
+    dir->id = id;
+    dir->type = TYPE_DIR;
+    dir->mode = O_RDWR;
+    strcpy(dir->name, name);
+    read_block(current_dir_entry.direct_table[0]);
+
+    // modify current dir entry
+    current_dir_entry.fsize += sizeof(dir_entry_t);
+    current_dir_entry.fnum += 1;
+    current_dir_entry.timestamp = get_timer();
+    write_inode(current_dir_entry.id);
+
     return 0;
 }
 
