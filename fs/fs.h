@@ -54,6 +54,8 @@
 
 #define BUFFER 0xffffffffa8000000
 
+#define ROOT_ID 0
+
 // offset is sector offset
 typedef struct super_block
 {

@@ -36,7 +36,7 @@ void read_superblock()
 
 void write_superblock()
 {
-    // printk("sd_card_write\n");
+    // printk("sd_card_write\n\r");
     sd_card_write(superblock, OFFSET_FS, SECTOR_SIZE);
 }
 
@@ -66,6 +66,7 @@ void read_inode(uint32_t id)
     uint32_t part = id % (SECTOR_SIZE / sizeof(inode_entry_t));
     sd_card_read((void *)BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
     memcpy((uint8_t *)&inode_buffer, (uint8_t *)(BUFFER + part * sizeof(inode_entry_t)), sizeof(inode_entry_t));
+    // kprintf("read id = %d inode.fnum = %d\n\r", id, inode_buffer.fnum);
 }
 
 void write_inode(uint32_t id)
@@ -75,6 +76,7 @@ void write_inode(uint32_t id)
     sd_card_read((void *)BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
     memcpy((uint8_t *)(BUFFER + part * sizeof(inode_entry_t)), (uint8_t *)&inode_buffer, sizeof(inode_entry_t));
     sd_card_write((void *)BUFFER, superblock->inode_offset + sector * SECTOR_SIZE, SECTOR_SIZE);
+    // kprintf("write id = %d inode.fnum = %d\n\r", id, inode_buffer.fnum);
 }
 
 void read_block(uint32_t id)
@@ -180,7 +182,7 @@ void init_superblock()
     superblock->free_block_num = NUM_BLOCK - INIT_USED_BLOCK;
     superblock->inode_size = sizeof(inode_entry_t);
     superblock->dir_size = sizeof(dir_entry_t);
-    printk("write_superblock\n");
+    // printk("write_superblock\n\r");
     write_superblock();
 }
 
@@ -279,7 +281,7 @@ void init_dir_block(uint32_t block, uint16_t father, uint16_t self)
 void init_rootdir()
 {
     uint32_t self = alloc_inode();
-    if (self != 0) {
+    if (self != ROOT_ID) {
         kprintf("[ERROR] ROOT DIR INODE NUMBER = %d, NOT ZERO\n\r", self);
     }
     uint32_t block = alloc_block();
@@ -321,7 +323,7 @@ int do_readdir(char *name)
 int do_mkdir(char *name)
 {
     // TODO: check name
-    kprintf("Creating dir: %s", name);
+    kprintf("Creating dir: %s...\n\r", name);
 
     uint32_t id = alloc_inode();
     uint32_t block = alloc_block();
@@ -335,15 +337,18 @@ int do_mkdir(char *name)
     dir->type = TYPE_DIR;
     dir->mode = O_RDWR;
     strcpy(dir->name, name);
-    read_block(current_dir_entry.direct_table[0]);
+    write_block(current_dir_entry.direct_table[0]);
 
     // modify current dir entry
     current_dir_entry.fsize += sizeof(dir_entry_t);
     current_dir_entry.fnum += 1;
+    // printk("current id = %d inode.fnum = %d\n\r", current_dir_entry.id, current_dir_entry.fnum);
     current_dir_entry.timestamp = get_timer();
+    memcpy((uint8_t *)&inode_buffer, (uint8_t *)&current_dir_entry, sizeof(inode_entry_t));
     write_inode(current_dir_entry.id);
 
-    return 0;
+    return 1;
+    // return 0; // failure
 }
 
 int do_rmdir(char *name)
@@ -391,6 +396,20 @@ int do_cat(char *name)
 
 int do_ls()
 {
+    read_block(current_dir_entry.direct_table[0]);
+    int i;
+    dir_entry_t * dir = (dir_entry_t *)(BUFFER + 2 * sizeof(dir_entry_t));
+    kprintf(". ..\n\r");
+    if (current_dir_entry.fnum) {
+        kprintf("  Name \t TYPE \t Mode\n\r");
+        // kprintf("current_dir_entry.fnum = %d\n\r", current_dir_entry.fnum);
+    }
+    for (i = 0; i < current_dir_entry.fnum; i++) {
+        dir_entry_t * dir = (dir_entry_t *)(BUFFER + (i + 2) * sizeof(dir_entry_t));
+        kprintf("  %s    %s    %s\n\r",dir->name,
+                               (dir->type == TYPE_DIR) ? "DIR" : "FILE",
+                               (dir->mode == O_RDWR) ? "O_RDWR" : (dir->mode == O_WRONLY) ? "O_WRONLY" : "O_RDONLY");
+    }
     return 0;
 }
 
@@ -444,6 +463,15 @@ void init_fs()
     if (superblock->magic == KFS_MAGIC) {
         printk("[FS] File system has existed in disk!      \n\r");
         do_statfs();
+
+        // load root directory: inode
+        read_inode(ROOT_ID);
+        // point to root directory
+        memcpy((uint8_t *)&current_dir_entry, (uint8_t *)&inode_buffer, sizeof(inode_entry_t));
+        printk("current_dir_entry.fnum = %d\n\r", current_dir_entry.fnum);
+
+        read_inodebmp();
+        read_blockbmp();
     }
     else {
         printk("[FS] No File system!       \n\r");

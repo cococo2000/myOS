@@ -153,6 +153,9 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
         else if (!strcmp(argv[0], "statfs")) {
             sys_print_fs();
         }
+        else if (!strcmp(argv[0], "ls")) {
+            sys_ls();
+        }
         else {
             printf("Command '%s' not found!\n", argv[0]);
         }
@@ -166,6 +169,11 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
         else if (!strcmp(argv[0], "kill")) {
             if (!sys_kill(pid)) {
                 printf("kill process pid = %d.\n", pid);
+            }
+        }
+        else if (!strcmp(argv[0], "mkdir")) {
+            if (sys_mkdir(argv[1])) {
+                printf("Successfully create dir: %s\n", argv[1]);
             }
         }
         else {
