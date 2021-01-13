@@ -111,10 +111,6 @@ typedef struct fd
     uint32_t mode;
     uint32_t r_offset;
     uint32_t w_offset;
-    // uint32_t direct_table[MAX_DIRECT_NUM];
-    // uint32_t indirect_1_ptr;
-    // uint32_t indirect_2_ptr;
-    // uint32_t indirect_3_ptr;
 } fd_t;
 
 // extern inode_entry_t current_dir_entry;
@@ -133,7 +129,5 @@ int do_cat(char *name);
 int do_write(uint32_t fd, char *buff, uint32_t size);
 int do_read(uint32_t fd, char *buff, uint32_t size);
 int do_close(uint32_t fd);
-
-int do_ls();
 
 #endif

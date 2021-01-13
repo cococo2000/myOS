@@ -172,7 +172,7 @@ void sys_init_mac()
 
 void sys_mkfs()
 {
-    return invoke_syscall(SYSCALL_FS_MKFS, IGNORE, IGNORE, IGNORE);
+    invoke_syscall(SYSCALL_FS_MKFS, IGNORE, IGNORE, IGNORE);
 }
 
 int sys_mkdir(char *name)
@@ -192,7 +192,7 @@ int sys_enterdir(char *name)
 
 int sys_rmdir(char *name)
 {
-    return invoke_syscall(SYSCALL_FS_ENTERDIR, (uint64_t)name, IGNORE, IGNORE);
+    return invoke_syscall(SYSCALL_FS_RMDIR, (uint64_t)name, IGNORE, IGNORE);
 }
 
 // int sys_print_fs(char *name)
@@ -229,9 +229,4 @@ int sys_fread(uint32_t fd, char *buff, uint32_t size)
 int sys_close(uint32_t fd)
 {
     return invoke_syscall(SYSCALL_FS_CLOSE, (uint64_t)fd, IGNORE, IGNORE);
-}
-
-int sys_ls(char *name)
-{
-    return invoke_syscall(SYSCALL_FS_LS, (uint64_t)name, IGNORE, IGNORE);
 }

@@ -154,7 +154,7 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
             sys_print_fs();
         }
         else if (!strcmp(argv[0], "ls")) {
-            sys_ls();
+            sys_readdir(argv[1]);
         }
         else {
             printf("Command '%s' not found!\n", argv[0]);
@@ -172,8 +172,13 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
             }
         }
         else if (!strcmp(argv[0], "mkdir")) {
-            if (sys_mkdir(argv[1])) {
+            if (!sys_mkdir(argv[1])) {
                 printf("Successfully create dir: %s\n", argv[1]);
+            }
+        }
+        else if (!strcmp(argv[0], "rmdir")) {
+            if (!sys_rmdir(argv[1])) {
+                printf("Successfully remove dir: %s\n", argv[1]);
             }
         }
         else {

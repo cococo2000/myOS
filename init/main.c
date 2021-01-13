@@ -184,7 +184,6 @@ static void init_syscall(void)
     syscall[SYSCALL_FS_CAT             ] = (uint64_t (*)())do_cat;
     syscall[SYSCALL_FS_READ            ] = (uint64_t (*)())do_read;
     syscall[SYSCALL_FS_CLOSE           ] = (uint64_t (*)())do_close;
-    syscall[SYSCALL_FS_LS              ] = (uint64_t (*)())do_ls;
 }
 
 /* [0] The beginning of everything >_< */
