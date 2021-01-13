@@ -132,4 +132,6 @@ int do_write(uint32_t fd, char *buff, uint32_t size);
 int do_read(uint32_t fd, char *buff, uint32_t size);
 int do_close(uint32_t fd);
 
+int do_ls();
+
 #endif

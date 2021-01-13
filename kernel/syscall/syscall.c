@@ -230,3 +230,8 @@ int sys_close(uint32_t fd)
 {
     return invoke_syscall(SYSCALL_FS_CLOSE, (uint64_t)fd, IGNORE, IGNORE);
 }
+
+int sys_ls(char *name)
+{
+    return invoke_syscall(SYSCALL_FS_LS, (uint64_t)name, IGNORE, IGNORE);
+}

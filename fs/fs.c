@@ -388,6 +388,12 @@ int do_cat(char *name)
     return -1; // open failure
 }
 
+
+int do_ls()
+{
+    return 0;
+}
+
 void do_mkfs()
 {
     int temp_x = screen_cursor_x;
