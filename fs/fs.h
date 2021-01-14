@@ -107,7 +107,7 @@ typedef struct dir_entry
 typedef struct fd
 {
     uint32_t inode_id;
-    uint32_t fsize;
+    // uint32_t fsize;
     uint32_t mode;
     uint32_t r_offset;
     uint32_t w_offset;

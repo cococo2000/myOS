@@ -29,6 +29,7 @@
 #include "stdio.h"
 #include "syscall.h"
 #include "test.h"
+#include "fs.h"
 
 #ifdef P3_TEST
 
@@ -179,6 +180,16 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
         else if (!strcmp(argv[0], "rmdir")) {
             if (!sys_rmdir(argv[1])) {
                 printf("Successfully remove dir: %s\n", argv[1]);
+            }
+        }
+        else if (!strcmp(argv[0], "touch")) {
+            if (!sys_fopen(argv[1], O_RDWR)) {
+                printf("Successfully open file: %s\n", argv[1]);
+            }
+        }
+        else if (!strcmp(argv[0], "cat")) {
+            if (!sys_cat(argv[1])) {
+                printf("Successfully cat file: %s\n", argv[1]);
             }
         }
         else {
