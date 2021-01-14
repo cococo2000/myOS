@@ -37,7 +37,7 @@ image: bootblock main
 	./createimage --extended bootblock main
 
 clean:
-	rm -rf bootblock image createimage main *.o disk
+	rm -rf bootblock image createimage main *.o
 
 floppy:
 	# sudo dd if=/dev/zero of=zero bs=1M count=2048
