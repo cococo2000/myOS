@@ -333,7 +333,30 @@ int is_name_in_dir(char * name)
 
 int do_enterdir(char *name)
 {
-
+    int id;
+    if (!strcmp(name, ".")) {
+        return 0;
+    }
+    else if (!strcmp(name, "..")) {
+        dir_entry_t * dir = (dir_entry_t *)BUFFER;
+        id = dir->id;
+    }
+    else {
+        id = is_name_in_dir(name);
+        if (id == -1) {
+            kprintf("Dir: %s not found, creating...\n",name);
+            do_mkdir(name);
+            id = is_name_in_dir(name);
+        }
+        else {
+            dir_entry_t * dir = (dir_entry_t *)(BUFFER + (id + 2) * sizeof(dir_entry_t));
+            id = dir->id;
+        }
+    }
+    kprintf("Opening dir: %s (id = %d)...\n", name, id);
+    read_inode(id);
+    memcpy((uint8_t *)&current_dir_entry, (uint8_t *)&inode_buffer, sizeof(inode_entry_t));
+    return 0;
 }
 
 int do_readdir(char *name)

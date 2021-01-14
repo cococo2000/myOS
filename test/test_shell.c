@@ -192,6 +192,11 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
                 printf("Successfully cat file: %s\n", argv[1]);
             }
         }
+        else if (!strcmp(argv[0], "cd")) {
+            if (!sys_enterdir(argv[1])) {
+                printf("Successfully enter dir: %s\n", argv[1]);
+            }
+        }
         else {
             printf("Command '%s' not found!\n", argv[0]);
         }
