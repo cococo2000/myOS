@@ -155,7 +155,7 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
             sys_print_fs();
         }
         else if (!strcmp(argv[0], "ls")) {
-            sys_readdir(argv[1]);
+            sys_readdir("\0");
         }
         else {
             printf("Command '%s' not found!\n", argv[0]);
@@ -196,6 +196,9 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
             if (!sys_enterdir(argv[1])) {
                 printf("Successfully enter dir: %s\n", argv[1]);
             }
+        }
+        else if (!strcmp(argv[0], "ls")) {
+            sys_readdir(argv[1]);
         }
         else {
             printf("Command '%s' not found!\n", argv[0]);

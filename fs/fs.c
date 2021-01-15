@@ -29,6 +29,7 @@ static super_block_t *superblock = (super_block_t *)superblock_buffer;
 static fd_t fds[NUM_FD];
 static num_open_files = 0;
 static inode_entry_t current_dir_entry;
+static current_dir_id = 0;
 
 void read_superblock()
 {
@@ -311,6 +312,18 @@ void print_superblock()
     screen_cursor_y = temp_y;
 }
 
+void save_current_dir()
+{
+    current_dir_id = current_dir_entry.id;
+}
+
+
+void restore_current_dir()
+{
+    read_inode(current_dir_id);
+    memcpy((uint8_t *)&current_dir_entry, (uint8_t *)&inode_buffer, sizeof(inode_entry_t));
+}
+
 int is_name_in_dir(char * name)
 {
     read_block(current_dir_entry.direct_table[0]);
@@ -415,6 +428,8 @@ int do_enterdir(char *name)
 int do_readdir(char *name)
 {
     // TODO: name
+    save_current_dir();
+    do_enterdir(name);
     read_block(current_dir_entry.direct_table[0]);
     int i;
     dir_entry_t * dir = (dir_entry_t *)(BUFFER + 2 * sizeof(dir_entry_t));
@@ -430,6 +445,7 @@ int do_readdir(char *name)
                 (dir->type == TYPE_DIR) ? "DIR" : "FILE",
                 (dir->mode == O_RDWR) ? "O_RDWR" : (dir->mode == O_WRONLY) ? "O_WRONLY" : "O_RDONLY");
     }
+    restore_current_dir();
     return 0;
 }
 
