@@ -665,17 +665,21 @@ int do_write(uint32_t fd, char *buff, uint32_t size)
                 bzero((void *)BUFFER, BLOCK_SIZE);
                 write_block(block_id);
             }
+            kprintf("inode_buffer.indirect_1_ptr\n");
             read_block(block_id);
-            id_block = (uint32_t *)(BUFFER + begin_block - MAX_DIRECT_NUM);
-            if (*id_block == 0) {
+            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM) * sizeof(uint32_t));
+            // if (*id_block == 0) {
                 int temp = alloc_block();
                 *id_block = temp;
+                kprintf("alloc_block: %d\n", temp);
                 write_block(block_id);
                 block_id = temp;
-            }
-            else {
-                block_id = *id_block;
-            }
+            // }
+            // else {
+            //     block_id = *id_block;
+            // }
+            kprintf("block id: %d\n", block_id);
+            kprintf("inode_buffer.indirect_1_ptr done\n");
             read_block(block_id);
         }
         else if (fds[fd].w_offset <= MAX_DIRECT_NUM * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE)
@@ -689,7 +693,7 @@ int do_write(uint32_t fd, char *buff, uint32_t size)
                 write_block(block_id);
             }
             read_block(block_id);
-            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) / (BLOCK_SIZE / sizeof(uint32_t)));
+            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) / (BLOCK_SIZE / sizeof(uint32_t))  * sizeof(uint32_t));
             if (*id_block == 0) {
                 int temp = alloc_block();
                 *id_block = temp;
@@ -700,7 +704,7 @@ int do_write(uint32_t fd, char *buff, uint32_t size)
                 block_id = *id_block;
             }
             read_block(block_id);
-            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) % (BLOCK_SIZE / sizeof(uint32_t)));
+            id_block = (uint32_t *)(BUFFER + ((begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) % (BLOCK_SIZE / sizeof(uint32_t))) * sizeof(uint32_t));
             if (*id_block == 0) {
                 int temp = alloc_block();
                 *id_block = temp;
@@ -774,7 +778,7 @@ int do_read(uint32_t fd, char *buff, uint32_t size)
         {
             block_id = inode_buffer.indirect_1_ptr;
             read_block(block_id);
-            id_block = (uint32_t *)(BUFFER + begin_block - MAX_DIRECT_NUM);
+            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM) * sizeof(uint32_t));
             block_id = *id_block;
             read_block(block_id);
         }
@@ -782,10 +786,10 @@ int do_read(uint32_t fd, char *buff, uint32_t size)
         {
             block_id = inode_buffer.indirect_2_ptr;
             read_block(block_id);
-            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) / (BLOCK_SIZE / sizeof(uint32_t)));
+            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) / (BLOCK_SIZE / sizeof(uint32_t)) * sizeof(uint32_t));
             block_id = *id_block;
             read_block(block_id);
-            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) % (BLOCK_SIZE / sizeof(uint32_t)));
+            id_block = (uint32_t *)(BUFFER + ((begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) % (BLOCK_SIZE / sizeof(uint32_t))) * sizeof(uint32_t));
             block_id = *id_block;
             read_block(block_id);
         }
@@ -851,6 +855,9 @@ int do_cat(char *name)
     for (i = 0; i < inode_buffer.fsize; i++)
     {
         kprintf("%c", data_block[i]);
+        if (i > SECTOR_SIZE) {
+            break;
+        }
     }
     return 0;
 }
