@@ -85,6 +85,7 @@
 #define SYSCALL_FS_CAT 59
 #define SYSCALL_FS_READ 60
 #define SYSCALL_FS_CLOSE 61
+#define SYSCALL_FS_LINK 62
 
 #define SYSCALL_WAIT_RECV_PACKAGE 42
 #define SYSCALL_NET_RECV 43
@@ -141,6 +142,7 @@ int sys_cat(char *);
 int sys_fwrite(uint32_t, char *, uint32_t);
 int sys_fread(uint32_t, char *, uint32_t);
 int sys_close(uint32_t);
+int sys_link(char *src, char *dest, uint32_t soft);
 
 uint32_t sys_get_timer();
 void sys_yield();

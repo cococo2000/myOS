@@ -665,21 +665,21 @@ int do_write(uint32_t fd, char *buff, uint32_t size)
                 bzero((void *)BUFFER, BLOCK_SIZE);
                 write_block(block_id);
             }
-            kprintf("inode_buffer.indirect_1_ptr\n");
+            // kprintf("inode_buffer.indirect_1_ptr\n");
             read_block(block_id);
             id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM) * sizeof(uint32_t));
             // if (*id_block == 0) {
                 int temp = alloc_block();
                 *id_block = temp;
-                kprintf("alloc_block: %d\n", temp);
+                // kprintf("alloc_block: %d\n", temp);
                 write_block(block_id);
                 block_id = temp;
             // }
             // else {
             //     block_id = *id_block;
             // }
-            kprintf("block id: %d\n", block_id);
-            kprintf("inode_buffer.indirect_1_ptr done\n");
+            // kprintf("block id: %d\n", block_id);
+            // kprintf("inode_buffer.indirect_1_ptr done\n");
             read_block(block_id);
         }
         else if (fds[fd].w_offset <= MAX_DIRECT_NUM * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE)
@@ -722,11 +722,11 @@ int do_write(uint32_t fd, char *buff, uint32_t size)
         }
         write_offset = fds[fd].w_offset - begin_block * BLOCK_SIZE;
         write_size = ((BLOCK_SIZE - write_offset) > size) ? size : (BLOCK_SIZE - write_offset);
-        kprintf("loaded block: %d, w_offset: %d, write_offset: %d, write_size: %d\t", block_id, fds[fd].w_offset, write_offset, write_size);
+        // kprintf("loaded block: %d, w_offset: %d, write_offset: %d, write_size: %d\t", block_id, fds[fd].w_offset, write_offset, write_size);
         p_block = (char *)(BUFFER + write_offset);
         memcpy(p_block, buff, write_size);
         write_block(block_id);
-        kprintf("memcpy(buff, p_block, read_size) done.\n");
+        // kprintf("memcpy(buff, p_block, read_size) done.\n");
         buff += write_size;
         fds[fd].w_offset += write_size;
         if (inode_buffer.fsize < fds[fd].w_offset)
@@ -840,7 +840,13 @@ int do_cat(char *name)
     {
         dir_entry_t *dir = (dir_entry_t *)(BUFFER + (id + 2) * sizeof(dir_entry_t));
         id = dir->id;
-        if (dir->type != TYPE_FILE)
+        if (dir->type == TYPE_SLINK) {
+            read_inode(id);
+            read_block(inode_buffer.direct_table[0]);
+            uint32_t * p_data = (uint32_t *)BUFFER;
+            id = *p_data;
+        }
+        else if (dir->type != TYPE_FILE)
         {
             kprintf("%s is not a file, but a dir\n", name);
             return -1; // failure
@@ -860,6 +866,66 @@ int do_cat(char *name)
         }
     }
     return 0;
+}
+
+int do_link(char *src, char *dest, uint32_t soft)
+{
+    int src_id = is_name_in_dir(src);
+    if (src_id == -1)
+    {
+        kprintf("File: %s not found\n", src);
+        return -1; // open failure
+    }
+    read_block(current_dir_entry.direct_table[0]);
+    dir_entry_t *src_dir = (dir_entry_t *)(BUFFER + (src_id + 2) * sizeof(dir_entry_t));
+    src_id = src_dir->id;
+    if (soft) {
+        uint32_t id = alloc_inode();
+        uint32_t block = alloc_block();
+        init_inode(block, current_dir_entry.id, id, O_RDWR, TYPE_FILE);
+
+        // modify current dir block
+        dir_entry_t *dir = (dir_entry_t *)(BUFFER + (current_dir_entry.fnum + 2) * sizeof(dir_entry_t));
+        read_block(current_dir_entry.direct_table[0]);
+        dir->id = id;
+        dir->type = TYPE_SLINK;
+        dir->mode = src_dir->mode;
+        strcpy(dir->name, dest);
+        write_block(current_dir_entry.direct_table[0]);
+
+        // modify current dir entry
+        current_dir_entry.fsize += sizeof(dir_entry_t);
+        current_dir_entry.fnum += 1;
+        // printk("current id = %d inode.fnum = %d\n\r", current_dir_entry.id, current_dir_entry.fnum);
+        current_dir_entry.timestamp = get_timer();
+        memcpy((uint8_t *)&inode_buffer, (uint8_t *)&current_dir_entry, sizeof(inode_entry_t));
+        write_inode(current_dir_entry.id);
+        
+        read_block(block);
+        uint32_t * p_data = (uint32_t *)BUFFER;
+        * p_data = src_id;
+        write_block(block);
+        return 0;
+    }
+    else {
+        // modify current dir block
+        dir_entry_t *dir = (dir_entry_t *)(BUFFER + (current_dir_entry.fnum + 2) * sizeof(dir_entry_t));
+        dir->id = src_dir->id;
+        dir->type = src_dir->type;
+        dir->mode = src_dir->mode;
+        strcpy(dir->name, dest);
+        write_block(current_dir_entry.direct_table[0]);
+
+        // modify current dir entry
+        current_dir_entry.fsize += sizeof(dir_entry_t);
+        current_dir_entry.fnum += 1;
+        current_dir_entry.links_cnt += 1;
+        // printk("current id = %d inode.fnum = %d\n\r", current_dir_entry.id, current_dir_entry.fnum);
+        current_dir_entry.timestamp = get_timer();
+        memcpy((uint8_t *)&inode_buffer, (uint8_t *)&current_dir_entry, sizeof(inode_entry_t));
+        write_inode(current_dir_entry.id);
+        return 0;
+    }
 }
 
 void do_mkfs()

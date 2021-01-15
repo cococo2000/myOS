@@ -47,6 +47,7 @@
 #define TYPE_SELF   3
 #define TYPE_FATHER 4
 #define TYPE_ROOT   5
+#define TYPE_SLINK  6
 
 #define O_RDONLY 1
 #define O_WRONLY 2
@@ -129,5 +130,7 @@ int do_cat(char *name);
 int do_write(uint32_t fd, char *buff, uint32_t size);
 int do_read(uint32_t fd, char *buff, uint32_t size);
 int do_close(uint32_t fd);
+
+int do_link(char *src, char *dest, uint32_t soft);
 
 #endif

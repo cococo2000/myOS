@@ -230,3 +230,8 @@ int sys_close(uint32_t fd)
 {
     return invoke_syscall(SYSCALL_FS_CLOSE, (uint64_t)fd, IGNORE, IGNORE);
 }
+
+int sys_link(char *src, char *dest, uint32_t soft)
+{
+    return invoke_syscall(SYSCALL_FS_LINK, (uint64_t)src, (uint64_t)dest, (uint64_t)soft);
+}

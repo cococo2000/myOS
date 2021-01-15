@@ -215,6 +215,16 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
             pcb[i].user_context.regs[5] = atoi(argv[3]);
             pcb[i].user_context.regs[6] = atoi(argv[4]);
         }
+        else if (argc == 4 && !strcmp(argv[0], "ln") && !strcmp(argv[1], "-s")) {
+            if (!sys_link(argv[2], argv[3], 1)) {
+                printf("Successfully create soft link: %s -> %s\n", argv[3], argv[2]);
+            }
+        }
+        else if (argc == 3 && !strcmp(argv[0], "ln")) {
+            if (!sys_link(argv[1], argv[2], 0)) {
+                printf("Successfully create hard link: %s -> %s\n", argv[2], argv[1]);
+            }
+        }
         else {
             printf("Command '%s' not found!\n", argv[0]);
         }
