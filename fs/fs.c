@@ -637,13 +637,101 @@ int do_write(uint32_t fd, char *buff, uint32_t size)
     // char *p_block = (char *)(BUFFER + fds[fd].w_offset);
     // memcpy(p_block, buff, size);
     // write_block(inode_buffer.direct_table[0]);
-
-
-    fds[fd].w_offset += size;
-    if (inode_buffer.fsize < fds[fd].w_offset)
+    int block_id;
+    int write_offset;
+    int write_size;
+    uint32_t begin_block;
+    char * p_block;
+    uint32_t * id_block;
+    while (size > 0)
     {
-        inode_buffer.fsize = fds[fd].w_offset;
+        begin_block = fds[fd].w_offset / BLOCK_SIZE;
+        if (fds[fd].w_offset <= MAX_DIRECT_NUM * BLOCK_SIZE)
+        {
+            block_id = inode_buffer.direct_table[begin_block];
+            if (block_id == 0) {
+                block_id = alloc_block();
+                inode_buffer.direct_table[begin_block] = block_id;
+            }
+            read_block(block_id);
+        }
+        else if (fds[fd].w_offset <= MAX_DIRECT_NUM * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE)
+        {
+            block_id = inode_buffer.indirect_1_ptr;
+            if (block_id == 0) {
+                block_id = alloc_block();
+                inode_buffer.indirect_1_ptr = block_id;
+                read_block(block_id);
+                bzero((void *)BUFFER, BLOCK_SIZE);
+                write_block(block_id);
+            }
+            read_block(block_id);
+            id_block = (uint32_t *)(BUFFER + begin_block - MAX_DIRECT_NUM);
+            if (*id_block == 0) {
+                int temp = alloc_block();
+                *id_block = temp;
+                write_block(block_id);
+                block_id = temp;
+            }
+            else {
+                block_id = *id_block;
+            }
+            read_block(block_id);
+        }
+        else if (fds[fd].w_offset <= MAX_DIRECT_NUM * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE)
+        {
+            block_id = inode_buffer.indirect_2_ptr;
+            if (block_id == 0) {
+                block_id = alloc_block();
+                inode_buffer.indirect_2_ptr = block_id;
+                read_block(block_id);
+                bzero((void *)BUFFER, BLOCK_SIZE);
+                write_block(block_id);
+            }
+            read_block(block_id);
+            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) / (BLOCK_SIZE / sizeof(uint32_t)));
+            if (*id_block == 0) {
+                int temp = alloc_block();
+                *id_block = temp;
+                write_block(block_id);
+                block_id = temp;
+            }
+            else {
+                block_id = *id_block;
+            }
+            read_block(block_id);
+            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) % (BLOCK_SIZE / sizeof(uint32_t)));
+            if (*id_block == 0) {
+                int temp = alloc_block();
+                *id_block = temp;
+                write_block(block_id);
+                block_id = temp;
+            }
+            else {
+                block_id = *id_block;
+            }
+            read_block(block_id);
+        }
+        else
+        {
+            kprintf("Too large size. Not supported.\n");
+        }
+        write_offset = fds[fd].w_offset - begin_block * BLOCK_SIZE;
+        write_size = ((BLOCK_SIZE - write_offset) > size) ? size : (BLOCK_SIZE - write_offset);
+        kprintf("loaded block: %d, w_offset: %d, write_offset: %d, write_size: %d\t", block_id, fds[fd].w_offset, write_offset, write_size);
+        p_block = (char *)(BUFFER + write_offset);
+        memcpy(p_block, buff, write_size);
+        write_block(block_id);
+        kprintf("memcpy(buff, p_block, read_size) done.\n");
+        buff += write_size;
+        fds[fd].w_offset += write_size;
+        if (inode_buffer.fsize < fds[fd].w_offset)
+        {
+            inode_buffer.fsize = fds[fd].w_offset;
+        }
+        size -= write_size;
     }
+
     // kprintf("File size: %d\n", inode_buffer.fsize);
     inode_buffer.timestamp = get_timer();
     write_inode(fds[fd].inode_id);
