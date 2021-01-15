@@ -37,13 +37,13 @@ void test_big_file(void)
     int fd = sys_fopen("2.txt", O_RDWR);
 
     // write 'hello world!' * 10
-    for (i = 0; i < 1000; i++)
+    for (i = 0; i < 10000; i++)
     {
         sys_fwrite(fd, "hello world!\n", 4096);
     }
 
     // read
-    for (i = 0; i < 1000; i++)
+    for (i = 0; i < 10000; i++)
     {
         sys_fread(fd, buff, 4096);
         for (j = 0; j < 13; j++)
