@@ -183,8 +183,8 @@ void execute(uint32_t argc, char argv[][LEN_ARGV])
             }
         }
         else if (!strcmp(argv[0], "touch")) {
-            if (!sys_fopen(argv[1], O_RDWR)) {
-                printf("Successfully open file: %s\n", argv[1]);
+            if (!sys_mknod(argv[1])) {
+                printf("Successfully create file: %s\n", argv[1]);
             }
         }
         else if (!strcmp(argv[0], "cat")) {

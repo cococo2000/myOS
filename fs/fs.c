@@ -327,6 +327,7 @@ int is_name_in_dir(char * name)
         return -1; // failure
     }
     else {
+        // return dir->id;
         return i;
     }
 }
@@ -334,28 +335,80 @@ int is_name_in_dir(char * name)
 int do_enterdir(char *name)
 {
     int id;
-    if (!strcmp(name, ".")) {
-        return 0;
+    // printk("In cd...\n\r");
+    if (name[strlen(name) - 1] == '/' && strlen(name) != 1) {
+        name[strlen(name) - 1] = '\0';
     }
-    else if (!strcmp(name, "..")) {
-        dir_entry_t * dir = (dir_entry_t *)BUFFER;
-        id = dir->id;
-    }
-    else {
-        id = is_name_in_dir(name);
-        if (id == -1) {
-            kprintf("Dir: %s not found, creating...\n",name);
-            do_mkdir(name);
-            id = is_name_in_dir(name);
+    char name_buf[10];
+    while (strlen(name)) {
+        // printk("name len: %d, %s\n\r", strlen(name), name);
+        if (name[0] == '/') {
+            id = ROOT_ID;
+            strcpy(name_buf, "root");
+            name++;
+        }
+        else if (name[0] == '.' && name[1] == '.') {
+            if (name[2] == '/' || name[2] == '\0') {
+                read_block(current_dir_entry.direct_table[0]);
+                dir_entry_t * dir = (dir_entry_t *)BUFFER; // ..
+                id = dir->id;
+                if (name[2] == '/') {
+                    name += 3;
+                }
+                else {
+                    name += 2;
+                }
+                strcpy(name_buf, "..");
+            }
+            else {
+                kprintf("Invalid path: %s\n", name);
+                return -1;
+            }
+        }
+        else if (name[0] == '.') {
+            if (name[1] == '/' || name[1] == '\0') {
+                if (name[1] == '/') {
+                    name += 2;
+                }
+                else {
+                    // '\0'
+                    name += 1;
+                    break;
+                }
+            }
+            else {
+                kprintf("Invalid path: %s", name);
+                return -1;
+            }
+            continue;
         }
         else {
-            dir_entry_t * dir = (dir_entry_t *)(BUFFER + (id + 2) * sizeof(dir_entry_t));
+            int j;
+            for (j = 0; j < strlen(name) && name[j] != '/'; j++) {
+                name_buf[j] = name[j];
+            }
+            name_buf[j] = '\0';
+            // printk("name buf: %s\n\r", name_buf);
+            int i = is_name_in_dir(name_buf);
+            if (i == -1) {
+                kprintf("Dir: %s not found...\n",name);
+                // do_mkdir(name_buf);
+                // i = is_name_in_dir(name_buf);
+                return -1;
+            }
+            dir_entry_t * dir = (dir_entry_t *)(BUFFER + (i + 2) * sizeof(dir_entry_t));
             id = dir->id;
+            if (name[j] == '\0') {
+                name += j;
+            }
+            else {
+                name += j + 1;
+            }
         }
+        kprintf("Opening dir: %s (id = %d)...\n", name_buf, id);
+        read_inode(id);
+        memcpy((uint8_t *)&current_dir_entry, (uint8_t *)&inode_buffer, sizeof(inode_entry_t));
     }
-    kprintf("Opening dir: %s (id = %d)...\n", name, id);
-    read_inode(id);
-    memcpy((uint8_t *)&current_dir_entry, (uint8_t *)&inode_buffer, sizeof(inode_entry_t));
     return 0;
 }
 
@@ -449,8 +502,16 @@ int do_rmdir(char *name)
 
 int do_mknod(char *name)
 {
-    
-    return -1; // failure
+    int id = is_name_in_dir(name);
+    if (id == -1) {
+        kprintf("File: %s not found, creating...\n",name);
+        id = init_file(name, O_RDWR);
+        return 0;
+    }
+    else {
+        kprintf("File: %s has existed\n",name);
+        return -1; // failure
+    }
 }
 
 int init_file(char *name, uint32_t access) {
