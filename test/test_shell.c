@@ -68,6 +68,7 @@ struct task_info task19 = {"mac_recv", (uint64_t)&mac_recv_task, USER_PROCESS};
 
 #ifdef P6_TEST
 struct task_info task19 = {"fs_test", (uint64_t)&test_fs, USER_PROCESS};
+struct task_info task20 = {"big_file", (uint64_t)&test_big_file, USER_PROCESS};
 #endif
 
 static struct task_info *test_tasks[NUM_MAX_TASK] = {
@@ -98,6 +99,7 @@ static struct task_info *test_tasks[NUM_MAX_TASK] = {
 #endif
 #ifdef P6_TEST
     &task19,
+    &task20,
 #endif
 };
 
