@@ -95,17 +95,22 @@ uint32_t alloc_inode()
 {
     read_inodebmp();
     int i, j;
-    for (i = 0; i < INODE_BITMAP_SIZE; i++) {
-        if (inodebmp_buffer[i] != 0xff) {
+    for (i = 0; i < INODE_BITMAP_SIZE; i++)
+    {
+        if (inodebmp_buffer[i] != 0xff)
+        {
             break;
         }
     }
     uint8_t temp = inodebmp_buffer[i];
-    for (j = 0; j < 8; j++) {
-        if ((temp & 0x01) == 0) {
+    for (j = 0; j < 8; j++)
+    {
+        if ((temp & 0x01) == 0)
+        {
             break;
         }
-        else {
+        else
+        {
             temp = temp >> 1;
         }
     }
@@ -133,17 +138,22 @@ uint32_t alloc_block()
 {
     read_blockbmp();
     int i, j;
-    for (i = 0; i < BLOCK_BITMAP_SIZE; i++) {
-        if (blockbmp_buffer[i] != 0xff) {
+    for (i = 0; i < BLOCK_BITMAP_SIZE; i++)
+    {
+        if (blockbmp_buffer[i] != 0xff)
+        {
             break;
         }
     }
     uint8_t temp = blockbmp_buffer[i];
-    for (j = 0; j < 8; j++) {
-        if ((temp & 0x01) == 0) {
+    for (j = 0; j < 8; j++)
+    {
+        if ((temp & 0x01) == 0)
+        {
             break;
         }
-        else {
+        else
+        {
             temp = temp >> 1;
         }
     }
@@ -192,10 +202,12 @@ void init_blockbmp()
 {
     bzero(blockbmp_buffer, BLOCK_BITMAP_SIZE);
     int i, j;
-    for (i = 0; i < INIT_USED_BLOCK / 8; i++) {
+    for (i = 0; i < INIT_USED_BLOCK / 8; i++)
+    {
         blockbmp_buffer[i] = 0xff;
     }
-    for (j = 0; j < INIT_USED_BLOCK % 8; j++) {
+    for (j = 0; j < INIT_USED_BLOCK % 8; j++)
+    {
         blockbmp_buffer[i] |= (0x01 << j);
     }
     write_blockbmp();
@@ -213,17 +225,20 @@ void init_inode(uint32_t block, uint32_t father, uint32_t self, uint32_t mode, u
     inode_buffer.type = type;
     inode_buffer.mode = mode;
     inode_buffer.links_cnt = 0;
-    if (type == TYPE_DIR || type == TYPE_ROOT) {
+    if (type == TYPE_DIR || type == TYPE_ROOT)
+    {
         inode_buffer.fsize = 2 * sizeof(dir_entry_t);
     }
-    else {
+    else
+    {
         inode_buffer.fsize = 0;
     }
     inode_buffer.fnum = 0;
     inode_buffer.timestamp = get_timer();
     inode_buffer.direct_table[0] = block;
     int i;
-    for (i = 1; i < MAX_DIRECT_NUM; i++) {
+    for (i = 1; i < MAX_DIRECT_NUM; i++)
+    {
         inode_buffer.direct_table[i] = 0;
     }
     inode_buffer.indirect_1_ptr = 0;
@@ -236,7 +251,7 @@ void init_inode(uint32_t block, uint32_t father, uint32_t self, uint32_t mode, u
     //     read_inode(father);
     //     uint32_t fnum = ++(inode_buffer.fnum);
     //     write_inode(father);
-        
+
     //     uint32_t block = inode_buffer.direct_table[0];
     //     read_block(block);
     //     dir_entry_t* dir;
@@ -261,29 +276,30 @@ void init_inode(uint32_t block, uint32_t father, uint32_t self, uint32_t mode, u
 void init_dir_block(uint32_t block, uint16_t father, uint16_t self)
 {
     read_block(block);
-    
-    dir_entry_t * dir = (dir_entry_t *)BUFFER;
+
+    dir_entry_t *dir = (dir_entry_t *)BUFFER;
     dir->name[0] = '.';
     dir->name[1] = '.';
     dir->name[2] = '\0';
     dir->id = father;
     dir->type = TYPE_FATHER;
     dir->mode = O_RDWR;
-    
+
     dir = (dir_entry_t *)(BUFFER + sizeof(dir_entry_t));
     dir->name[0] = '.';
     dir->name[1] = '\0';
     dir->id = self;
     dir->type = TYPE_SELF;
     dir->mode = O_RDWR;
-    
+
     write_block(block);
 }
 
 void init_rootdir()
 {
     uint32_t self = alloc_inode();
-    if (self != ROOT_ID) {
+    if (self != ROOT_ID)
+    {
         kprintf("[ERROR] ROOT DIR INODE NUMBER = %d, NOT ZERO\n\r", self);
     }
     uint32_t block = alloc_block();
@@ -317,29 +333,32 @@ void save_current_dir()
     current_dir_id = current_dir_entry.id;
 }
 
-
 void restore_current_dir()
 {
     read_inode(current_dir_id);
     memcpy((uint8_t *)&current_dir_entry, (uint8_t *)&inode_buffer, sizeof(inode_entry_t));
 }
 
-int is_name_in_dir(char * name)
+int is_name_in_dir(char *name)
 {
     read_block(current_dir_entry.direct_table[0]);
     int i;
-    dir_entry_t * dir;
-    for (i = 0; i < current_dir_entry.fnum; i++) {
+    dir_entry_t *dir;
+    for (i = 0; i < current_dir_entry.fnum; i++)
+    {
         dir = (dir_entry_t *)(BUFFER + (i + 2) * sizeof(dir_entry_t));
-        if (!strcmp(dir->name, name)) {
+        if (!strcmp(dir->name, name))
+        {
             break;
         }
     }
-    if (i == current_dir_entry.fnum) {
+    if (i == current_dir_entry.fnum)
+    {
         kprintf("No such file or dir: %s\n", name);
         return -1; // failure
     }
-    else {
+    else
+    {
         // return dir->id;
         return i;
     }
@@ -349,72 +368,90 @@ int do_enterdir(char *name)
 {
     int id;
     // printk("In cd...\n\r");
-    if (name[strlen(name) - 1] == '/' && strlen(name) != 1) {
+    if (name[strlen(name) - 1] == '/' && strlen(name) != 1)
+    {
         name[strlen(name) - 1] = '\0';
     }
     char name_buf[10];
-    while (strlen(name)) {
+    while (strlen(name))
+    {
         // printk("name len: %d, %s\n\r", strlen(name), name);
-        if (name[0] == '/') {
+        if (name[0] == '/')
+        {
             id = ROOT_ID;
             strcpy(name_buf, "root");
             name++;
         }
-        else if (name[0] == '.' && name[1] == '.') {
-            if (name[2] == '/' || name[2] == '\0') {
+        else if (name[0] == '.' && name[1] == '.')
+        {
+            if (name[2] == '/' || name[2] == '\0')
+            {
                 read_block(current_dir_entry.direct_table[0]);
-                dir_entry_t * dir = (dir_entry_t *)BUFFER; // ..
+                dir_entry_t *dir = (dir_entry_t *)BUFFER; // ..
                 id = dir->id;
-                if (name[2] == '/') {
+                if (name[2] == '/')
+                {
                     name += 3;
                 }
-                else {
+                else
+                {
                     name += 2;
                 }
                 strcpy(name_buf, "..");
             }
-            else {
+            else
+            {
                 kprintf("Invalid path: %s\n", name);
                 return -1;
             }
         }
-        else if (name[0] == '.') {
-            if (name[1] == '/' || name[1] == '\0') {
-                if (name[1] == '/') {
+        else if (name[0] == '.')
+        {
+            if (name[1] == '/' || name[1] == '\0')
+            {
+                if (name[1] == '/')
+                {
                     name += 2;
                 }
-                else {
+                else
+                {
                     // '\0'
                     name += 1;
                     break;
                 }
             }
-            else {
+            else
+            {
                 kprintf("Invalid path: %s", name);
                 return -1;
             }
             continue;
         }
-        else {
+        else
+        {
             int j;
-            for (j = 0; j < strlen(name) && name[j] != '/'; j++) {
+            for (j = 0; j < strlen(name) && name[j] != '/'; j++)
+            {
                 name_buf[j] = name[j];
             }
             name_buf[j] = '\0';
             // printk("name buf: %s\n\r", name_buf);
             int i = is_name_in_dir(name_buf);
-            if (i == -1) {
-                kprintf("Dir: %s not found...\n",name);
+            if (i == -1)
+            {
+                kprintf("Dir: %s not found...\n", name);
                 // do_mkdir(name_buf);
                 // i = is_name_in_dir(name_buf);
                 return -1;
             }
-            dir_entry_t * dir = (dir_entry_t *)(BUFFER + (i + 2) * sizeof(dir_entry_t));
+            dir_entry_t *dir = (dir_entry_t *)(BUFFER + (i + 2) * sizeof(dir_entry_t));
             id = dir->id;
-            if (name[j] == '\0') {
+            if (name[j] == '\0')
+            {
                 name += j;
             }
-            else {
+            else
+            {
                 name += j + 1;
             }
         }
@@ -432,14 +469,16 @@ int do_readdir(char *name)
     do_enterdir(name);
     read_block(current_dir_entry.direct_table[0]);
     int i;
-    dir_entry_t * dir = (dir_entry_t *)(BUFFER + 2 * sizeof(dir_entry_t));
+    dir_entry_t *dir = (dir_entry_t *)(BUFFER + 2 * sizeof(dir_entry_t));
     kprintf(". ..\n");
-    if (current_dir_entry.fnum) {
+    if (current_dir_entry.fnum)
+    {
         kprintf("  Name \t TYPE \t Mode\n");
         // kprintf("current_dir_entry.fnum = %d\n\r", current_dir_entry.fnum);
     }
-    for (i = 0; i < current_dir_entry.fnum; i++) {
-        dir_entry_t * dir = (dir_entry_t *)(BUFFER + (i + 2) * sizeof(dir_entry_t));
+    for (i = 0; i < current_dir_entry.fnum; i++)
+    {
+        dir_entry_t *dir = (dir_entry_t *)(BUFFER + (i + 2) * sizeof(dir_entry_t));
         kprintf("  %s    %s    %s\n",
                 dir->name,
                 (dir->type == TYPE_DIR) ? "DIR" : "FILE",
@@ -460,8 +499,8 @@ int do_mkdir(char *name)
     init_dir_block(block, current_dir_entry.id, id);
 
     // modify current dir block
-    read_block(current_dir_entry.direct_table[0]);  // TODO: more dir
-    dir_entry_t * dir = (dir_entry_t *)(BUFFER + (current_dir_entry.fnum + 2) * sizeof(dir_entry_t));
+    read_block(current_dir_entry.direct_table[0]); // TODO: more dir
+    dir_entry_t *dir = (dir_entry_t *)(BUFFER + (current_dir_entry.fnum + 2) * sizeof(dir_entry_t));
     dir->id = id;
     dir->type = TYPE_DIR;
     dir->mode = O_RDWR;
@@ -484,14 +523,16 @@ int do_rmdir(char *name)
 {
     // TODO: check name
     kprintf("In rmdir...\n");
-    dir_entry_t * dir;
+    dir_entry_t *dir;
     int i = is_name_in_dir(name);
     dir = (dir_entry_t *)(BUFFER + (i + 2) * sizeof(dir_entry_t));
-    if (i == -1) {
+    if (i == -1)
+    {
         // kprintf("No such file or dir: %s\n", name);
         return -1; // failure
     }
-    else {
+    else
+    {
         kprintf("Removing dir: %s...\n", name);
         // modify current dir inode
         current_dir_entry.fsize -= sizeof(dir_entry_t);
@@ -502,13 +543,14 @@ int do_rmdir(char *name)
 
         // free rm dir inode and block
         read_inode(dir->id);
-        free_block(inode_buffer.direct_table[0]);   // TODO: more block
+        free_block(inode_buffer.direct_table[0]); // TODO: more block
         free_inode(dir->id);
 
         // modify current dir block
         read_block(current_dir_entry.direct_table[0]);
         bzero(dir, sizeof(dir_entry_t));
-        if (i != current_dir_entry.fnum) {
+        if (i != current_dir_entry.fnum)
+        {
             memcpy((char *)dir, (char *)(BUFFER + (current_dir_entry.fnum + 2) * sizeof(dir_entry_t)), sizeof(dir_entry_t));
         }
         write_block(current_dir_entry.direct_table[0]);
@@ -519,18 +561,21 @@ int do_rmdir(char *name)
 int do_mknod(char *name)
 {
     int id = is_name_in_dir(name);
-    if (id == -1) {
-        kprintf("File: %s not found, creating...\n",name);
+    if (id == -1)
+    {
+        kprintf("File: %s not found, creating...\n", name);
         id = init_file(name, O_RDWR);
         return 0;
     }
-    else {
-        kprintf("File: %s has existed\n",name);
+    else
+    {
+        kprintf("File: %s has existed\n", name);
         return -1; // failure
     }
 }
 
-int init_file(char *name, uint32_t access) {
+int init_file(char *name, uint32_t access)
+{
     // TODO: check name
     kprintf("Initializing file: %s...\n", name);
 
@@ -540,7 +585,7 @@ int init_file(char *name, uint32_t access) {
 
     // modify current dir block
     read_block(current_dir_entry.direct_table[0]);
-    dir_entry_t * dir = (dir_entry_t *)(BUFFER + (current_dir_entry.fnum + 2) * sizeof(dir_entry_t));
+    dir_entry_t *dir = (dir_entry_t *)(BUFFER + (current_dir_entry.fnum + 2) * sizeof(dir_entry_t));
     dir->id = id;
     dir->type = TYPE_FILE;
     dir->mode = access;
@@ -560,12 +605,14 @@ int init_file(char *name, uint32_t access) {
 int do_open(char *name, uint32_t access)
 {
     int id = is_name_in_dir(name);
-    if (id == -1) {
-        kprintf("File: %s not found, creating...\n",name);
+    if (id == -1)
+    {
+        kprintf("File: %s not found, creating...\n", name);
         id = init_file(name, access);
     }
-    else {
-        dir_entry_t * dir = (dir_entry_t *)(BUFFER + (id + 2) * sizeof(dir_entry_t));
+    else
+    {
+        dir_entry_t *dir = (dir_entry_t *)(BUFFER + (id + 2) * sizeof(dir_entry_t));
         id = dir->id;
     }
     kprintf("Opening file: %s (id = %d)...\n", name, id);
@@ -581,18 +628,20 @@ int do_open(char *name, uint32_t access)
 
 int do_write(uint32_t fd, char *buff, uint32_t size)
 {
-    kprintf("Writing to %d size = %d: ", fds[fd].inode_id, size);
-    kprintf("%s", buff);
+    // kprintf("Writing to %d size = %d: ", fds[fd].inode_id, size);
+    // kprintf("%s", buff);
     read_inode(fds[fd].inode_id);
 
-    read_block(inode_buffer.direct_table[0]);
-    // kprintf(" block id = %d\n", inode_buffer.direct_table[0]);
-    char * p_block = (char *)(BUFFER + fds[fd].w_offset);
-    memcpy(p_block, buff, size);
-    write_block(inode_buffer.direct_table[0]);
+    // read_block(inode_buffer.direct_table[0]);
+    // // kprintf(" block id = %d\n", inode_buffer.direct_table[0]);
+    // char *p_block = (char *)(BUFFER + fds[fd].w_offset);
+    // memcpy(p_block, buff, size);
+    // write_block(inode_buffer.direct_table[0]);
+
 
     fds[fd].w_offset += size;
-    if (inode_buffer.fsize < fds[fd].w_offset) {
+    if (inode_buffer.fsize < fds[fd].w_offset)
+    {
         inode_buffer.fsize = fds[fd].w_offset;
     }
     // kprintf("File size: %d\n", inode_buffer.fsize);
@@ -604,12 +653,70 @@ int do_write(uint32_t fd, char *buff, uint32_t size)
 int do_read(uint32_t fd, char *buff, uint32_t size)
 {
     read_inode(fds[fd].inode_id);
+    int end = fds[fd].r_offset + size;
+    if (end > inode_buffer.fsize)
+    {
+        kprintf("Read offset(0x%x) is out of fsize(0x%x)!\n", end, inode_buffer.fsize);
+        return -1; // failure
+    }
+    // if (size > BLOCK_SIZE)
+    // {
+    //     kprintf("Read size(0x%x) is to large.\n", size);
+    // }
 
-    read_block(inode_buffer.direct_table[0]);
-    char * p_block = (char *)(BUFFER + fds[fd].r_offset);
-    memcpy(buff, p_block, size);
+    // read_block(inode_buffer.direct_table[0]);
+    // char * p_block = (char *)(BUFFER + fds[fd].r_offset);
+    // memcpy(buff, p_block, size);
 
-    fds[fd].r_offset += size;
+    int block_id;
+    int read_offset;
+    int read_size;
+    uint32_t begin_block;
+    char * p_block;
+    uint32_t * id_block;
+    while (size > 0)
+    {
+        begin_block = fds[fd].r_offset / BLOCK_SIZE;
+        if (fds[fd].r_offset <= MAX_DIRECT_NUM * BLOCK_SIZE)
+        {
+            block_id = inode_buffer.direct_table[begin_block];
+            read_block(block_id);
+        }
+        else if (fds[fd].r_offset <= MAX_DIRECT_NUM * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE)
+        {
+            block_id = inode_buffer.indirect_1_ptr;
+            read_block(block_id);
+            id_block = (uint32_t *)(BUFFER + begin_block - MAX_DIRECT_NUM);
+            block_id = *id_block;
+            read_block(block_id);
+        }
+        else if (fds[fd].r_offset <= MAX_DIRECT_NUM * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE + (BLOCK_SIZE / sizeof(uint32_t)) * (BLOCK_SIZE / sizeof(uint32_t)) * BLOCK_SIZE)
+        {
+            block_id = inode_buffer.indirect_2_ptr;
+            read_block(block_id);
+            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) / (BLOCK_SIZE / sizeof(uint32_t)));
+            block_id = *id_block;
+            read_block(block_id);
+            id_block = (uint32_t *)(BUFFER + (begin_block - MAX_DIRECT_NUM - (BLOCK_SIZE / sizeof(uint32_t))) % (BLOCK_SIZE / sizeof(uint32_t)));
+            block_id = *id_block;
+            read_block(block_id);
+        }
+        else
+        {
+            kprintf("Too large size. Not supported.\n");
+        }
+        read_offset = fds[fd].r_offset - begin_block * BLOCK_SIZE;
+        read_size = ((BLOCK_SIZE - read_offset) > size) ? size : (BLOCK_SIZE - read_offset);
+        // kprintf("loaded block: %d, r_offset: %d, read_offset: %d, read_size: %d\t", block_id, fds[fd].r_offset, read_offset, read_size);
+        p_block = (char *)(BUFFER + read_offset);
+        memcpy(buff, p_block, read_size);
+        // kprintf("memcpy(buff, p_block, read_size) done.\n");
+        buff += read_size;
+        fds[fd].r_offset += read_size;
+        size -= read_size;
+    }
+
+    // fds[fd].r_offset += size;
     inode_buffer.timestamp = get_timer();
     write_inode(fds[fd].inode_id);
     return 0;
@@ -618,28 +725,32 @@ int do_read(uint32_t fd, char *buff, uint32_t size)
 int do_close(uint32_t fd)
 {
     num_open_files--;
-    if (fd == num_open_files) {
+    if (fd == num_open_files)
+    {
         bzero(&fds[fd], sizeof(fd_t));
     }
-    else {
+    else
+    {
         memcpy((char *)&fds[fd], (char *)&fds[num_open_files], sizeof(fd_t));
     }
     return 0;
 }
 
- 
 int do_cat(char *name)
 {
     int id = is_name_in_dir(name);
-    if (id == -1) {
-        kprintf("File: %s not found\n",name);
+    if (id == -1)
+    {
+        kprintf("File: %s not found\n", name);
         return -1; // open failure
     }
-    else {
-        dir_entry_t * dir = (dir_entry_t *)(BUFFER + (id + 2) * sizeof(dir_entry_t));
+    else
+    {
+        dir_entry_t *dir = (dir_entry_t *)(BUFFER + (id + 2) * sizeof(dir_entry_t));
         id = dir->id;
-        if (dir->type != TYPE_FILE) {
-            kprintf("%s is not a file, but a dir\n",name);
+        if (dir->type != TYPE_FILE)
+        {
+            kprintf("%s is not a file, but a dir\n", name);
             return -1; // failure
         }
     }
@@ -647,9 +758,10 @@ int do_cat(char *name)
     read_inode(id);
     read_block(inode_buffer.direct_table[0]);
     kprintf("File size: %d\n", inode_buffer.fsize);
-    char * data_block = (char *)BUFFER;
+    char *data_block = (char *)BUFFER;
     int i;
-    for (i = 0; i < inode_buffer.fsize; i++) {
+    for (i = 0; i < inode_buffer.fsize; i++)
+    {
         kprintf("%c", data_block[i]);
     }
     return 0;
@@ -692,7 +804,8 @@ void do_mkfs()
 void do_statfs()
 {
     read_superblock();
-    if(superblock->magic != KFS_MAGIC){
+    if (superblock->magic != KFS_MAGIC)
+    {
         kprintf("[ERROR] No File System!\n\r");
         return;
     }
@@ -702,7 +815,8 @@ void do_statfs()
 void init_fs()
 {
     read_superblock();
-    if (superblock->magic == KFS_MAGIC) {
+    if (superblock->magic == KFS_MAGIC)
+    {
         printk("[FS] File system has existed in disk!      \n\r");
         do_statfs();
 
@@ -715,7 +829,8 @@ void init_fs()
         read_inodebmp();
         read_blockbmp();
     }
-    else {
+    else
+    {
         printk("[FS] No File system!       \n\r");
         do_mkfs();
     }
